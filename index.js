@@ -1,4 +1,4 @@
-import { f, Watcher } from '../ubf/index.js';
+import { f, Watcher } from './ubf.js';
 import { onceMap } from './type.js';
 import { pure } from './util.js';
 import belts from './belts.js';
@@ -172,15 +172,15 @@ function ui_equip_detail(data) {
             h('span').addText('值'),
             h('input').setAttributes({ type: 'number' })
                 .setValue(x.value).on('change', ({ srcTarget, model }) => {
-                x.value = srcTarget.valueAsNumber;
-                model.calc();
-            }),
+                    x.value = srcTarget.valueAsNumber;
+                    model.calc();
+                }),
             h('span').addText('适用次数'),
             h('input').setAttributes({ type: 'number' })
                 .setValue(x.times).on('change', ({ srcTarget, model }) => {
-                x.times = srcTarget.valueAsNumber;
-                model.calc();
-            }),
+                    x.times = srcTarget.valueAsNumber;
+                    model.calc();
+                }),
         ]))
     ]).setStyle({ textAlign: 'center' });
 }
