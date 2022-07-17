@@ -1,4 +1,4 @@
-import { Equip, onceMap } from './type';
+import { Equip, onceMap } from './type.js';
 let weapons = new onceMap;
 let t;
 t = new Equip;

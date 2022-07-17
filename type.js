@@ -1,4 +1,4 @@
-import { copy } from "./util";
+import { copy } from "./util.js";
 export class Equip {
     constructor() {
         this.name = '';
