@@ -1,4 +1,4 @@
-import { f, Watcher } from '../ubf.js';
+import { f, Watcher } from './ubf.js';
 import { onceMap } from './type.js';
 import { pure } from './util.js';
 import belts from './belts.js';
