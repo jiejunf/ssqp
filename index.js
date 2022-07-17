@@ -1,449 +1,257 @@
-export class vElement {
-    constructor(tag) {
-        this.attributes = Object.create(null);
-        this.properties = Object.create(null);
-        this.$on = Object.create(null);
-        this.$once = Object.create(null);
-        this.style = Object.create(null);
-        this.children = [];
-        this.$ref = null;
-        this.tag = tag;
-    }
-    on(type, handler) {
-        if (!this.$on[type]) {
-            this.$on[type] = [];
-        }
-        this.$on[type].push(handler);
-        return this;
-    }
-    once(type, handler) {
-        if (!this.$once[type]) {
-            this.$once[type] = [];
-        }
-        this.$once[type].push(handler);
-        return this;
-    }
-    emit(ev, info) {
-        {
-            const m = this.$on[ev];
-            if (m && m.length) {
-                for (let i = 0, l = m.length; i < l; i++) {
-                    m[i](info);
-                }
-            }
-        }
-        {
-            const m = this.$once[ev];
-            if (m && m.length) {
-                for (let i = 0, l = m.length; i < l; i++) {
-                    m[i](info);
-                }
-                m.length = 0;
-            }
-        }
-    }
-    addEventListener(type, handler) {
-        this.on(type, handler);
-        return this;
-    }
-    addClass(c) {
-        let oc = (this.attributes.class || '') + ' ' + c;
-        let s = new Set(oc.split(/\s/).filter(x => x));
-        this.setAttributes({ class: [...s].join(' ') });
-        return this;
-    }
-    addChildren(children) {
-        for (let child of children) {
-            this.addChild(child);
-        }
-        return this;
-    }
-    addChild(child) {
-        if (typeof child === 'string') {
-            child = new vText(child);
-        }
-        if (!child) {
-            return this;
-        }
-        this.children.push(child);
-        return this;
-    }
-    addText(s) {
-        this.addChildren([s]);
-        return this;
-    }
-    setAny(t) {
-        let { properties } = this;
-        for (let [key, value] of Object.entries(t)) {
-            properties[key] = value;
-        }
-        return this;
-    }
-    //这里若指定t的类型为Partial<HTMLElementTagNames[T]>会卡得要死,可能的原因是引擎为函数体中的类型提示作预演算而HTMLElementTagNames[T]的路径过多而导致性能低下
-    setProperties(t) {
-        let { properties } = this;
-        for (let [key, value] of Object.entries(t)) {
-            properties[key] = value;
-        }
-        return this;
-    }
-    setStyle(t) {
-        let { style } = this;
-        for (let [key, value] of Object.entries(t)) {
-            style[key] = value;
-        }
-        return this;
-    }
-    setValue(v) {
-        this.properties.value = v;
-        return this;
-    }
-    setAttributes(t) {
-        let { attributes } = this;
-        for (let [key, value] of Object.entries(t)) {
-            attributes[key] = value;
-        }
-        return this;
-    }
-    removeStyle(key) {
-        this.style[key] = null;
-        return this;
-    }
-    removeAttribute(key) {
-        this.attributes[key] = null;
-        return this;
-    }
+import { f, Watcher } from '../ubf/index.js';
+import { onceMap } from './type.js';
+import { pure } from './util.js';
+import belts from './belts.js';
+import bracelets from './bracelets.js';
+import coats from './coats.js';
+import earrings from './earrings.js';
+import magicStones from './magicStones.js';
+import necklace from './necklaces.js';
+import pants from './pants.js';
+import rings from './rings.js';
+import shoes from './shoes.js';
+import shoulders from './shoulders.js';
+import supports from './supports.js';
+import weapons from './weapons.js';
+import { calculate } from './cal.js';
+const prefix = '105级装备数值速算';
+const slotNames = [
+    '上衣',
+    '下装',
+    '护肩',
+    '腰带',
+    '鞋子',
+    '手镯',
+    '戒指',
+    '项链',
+    '左槽',
+    '右槽',
+    '耳环',
+    '武器'
+];
+function has(item, key) {
+    return key in item;
 }
-export class vText {
-    constructor(data = '') {
-        this.data = '';
-        this.$ref = null;
-        this.data = data;
-    }
+function keys(item) {
+    return Object.keys(item);
 }
-function isNul(item) {
-    return (item === null) || (item === void 0);
-}
-export class Watcher {
-    constructor(init) {
-        this.root = (data) => new vElement('div');
-        this.listened = [];
-        this.target = null;
-        this.flushMs = 100;
-        this.flushAfterEvent = false;
-        this.$on = Object.create(null);
-        this.$once = Object.create(null);
-        this.flushing = false;
-        this.vdomTree = null;
-        this.flushTimer = null;
-        this.delayFlush = () => {
-            if (this.flushTimer !== null) {
-                return;
-            }
-            this.flushTimer = setInterval(() => {
-                if (this._flush()) {
-                    if (this.flushTimer !== null) {
-                        clearInterval(this.flushTimer);
-                        this.flushTimer = null;
-                    }
-                }
-            }, this.flushMs);
+class Data {
+    constructor() {
+        this.jsonInfo = '';
+        this.database = {
+            coats: coats.clone(),
+            pants: pants.clone(),
+            magicStones: magicStones.clone(),
+            supports: supports.clone(),
+            rings: rings.clone(),
+            bracelets: bracelets.clone(),
+            shoulders: shoulders.clone(),
+            weapons: weapons.clone(),
+            earrings: earrings.clone(),
+            belts: belts.clone(),
+            shoes: shoes.clone(),
+            necklace: necklace.clone(),
         };
-        this.listened = (init.listened || []).concat(['click', 'change']);
-        this.target = init.target;
-        this.data = init.data;
-        this.root = init.root;
-        this.model = this.genModel();
-        this.flushAfterEvent = !!init.flushAfterEvent;
-        this.listenDOMEvent();
-        this.delayFlush();
+        this.currentBox = pure();
+        this.result = void 0;
+        this._growth = 1;
+        this._detailedEquip = void 0;
+        this.highlight = '';
+        this._攻击强化百分比 = 0;
     }
-    afterflush(handler) {
-        this.on("afterflush", handler);
-    }
-    on(ev, handler) {
-        if (!this.$on[ev]) {
-            this.$on[ev] = [];
-        }
-        this.$on[ev].push(handler);
-    }
-    once(ev, handler) {
-        if (!this.$once[ev]) {
-            this.$once[ev] = [];
-        }
-        this.$once[ev].push(handler);
-    }
-    emit(ev) {
-        {
-            const m = this.$on[ev];
-            if (m && m.length) {
-                for (let i = 0, l = m.length; i < l; i++) {
-                    m[i]({
-                        model: this.model,
-                        eventName: ev,
-                        watcher: this
-                    });
-                }
-            }
-        }
-        {
-            const m = this.$once[ev];
-            if (m && m.length) {
-                for (let i = 0, l = m.length; i < l; i++) {
-                    m[i]({
-                        model: this.model,
-                        eventName: ev,
-                        watcher: this
-                    });
-                }
-                m.length = 0;
-            }
+    queryEquipMap(slot) {
+        switch (slot) {
+            case '上衣': return this.database.coats;
+            case '下装': return this.database.pants;
+            case '右槽': return this.database.magicStones;
+            case '左槽': return this.database.supports;
+            case '戒指': return this.database.rings;
+            case '手镯': return this.database.bracelets;
+            case '护肩': return this.database.shoulders;
+            case '武器': return this.database.weapons;
+            case '耳环': return this.database.earrings;
+            case '腰带': return this.database.belts;
+            case '鞋子': return this.database.shoes;
+            case '项链': return this.database.necklace;
         }
     }
-    genModel() {
-        return new Proxy(this.data, {
-            get: (target, key) => {
-                if (target && (typeof target === 'object')) {
-                    this.flush();
-                }
-                return Reflect.get(target, key);
-            },
-            set: (target, key, value) => {
-                if (value !== Reflect.get(target, key)) {
-                    Reflect.set(target, key, value);
-                    this.flush();
-                }
-                return true;
-            }
-        });
+    getEquipByName(name, slot) {
+        return this.queryEquipMap(slot).get(name);
     }
-    is_rended() {
-        return !!this.vdomTree;
+    get growth() {
+        return this._growth;
     }
-    flush() {
-        this.delayFlush();
+    set growth(value) {
+        this._growth = value;
+        this.calc();
     }
-    _flush() {
-        const f = this.flushing;
-        if (!f) {
-            this.flushing = true;
-            setTimeout(() => {
-                this.flushing = false;
-            }, this.flushMs);
-            if (!this.vdomTree) {
-                if (!this.target) {
-                    throw new Error('no target.');
-                }
-                //simple replacement at first flushing
-                let newTarget;
-                let t = this.vdomTree = this.root(this.data);
-                try {
-                    newTarget = rend(t);
-                }
-                catch (e) {
-                    newTarget = document.createTextNode('error appearanced while calling root function.');
-                }
-                this.target.replaceWith(newTarget);
-                this.target = null;
+    get detailedEquip() {
+        return this._detailedEquip;
+    }
+    set detailedEquip(value) {
+        this._detailedEquip = value;
+        this.calc();
+    }
+    get 攻击强化百分比() {
+        return this._攻击强化百分比;
+    }
+    set 攻击强化百分比(value) {
+        this._攻击强化百分比 = value;
+        this.calc();
+    }
+    calc() {
+        const eqs = Object.values(this.currentBox);
+        this.result = {
+            combination: eqs.map(x => `[${x.slot}]${x.name}`).join('+'),
+            detail: calculate(eqs, this.growth * (1 + this.攻击强化百分比 / 100))
+        };
+    }
+    exportJSON() {
+        const r = pure();
+        const keys = [
+            'currentBox',
+            'database'
+        ];
+        for (const key of keys) {
+            r[key] = this[key];
+        }
+        let v = JSON.stringify(r, function (_key, value) {
+            if (value instanceof Set || value instanceof Map) {
+                return [...value];
             }
             else {
-                /*diff*/
-                let newTree = this.root(this.data);
-                singleElementDiff(this.vdomTree, newTree);
-                this.vdomTree = newTree;
+                return value;
             }
-            setTimeout(() => this.emit('afterflush'));
+        }, '\t');
+        return v;
+    }
+    importJSON(s) {
+        const r = JSON.parse(s);
+        this.currentBox = r.currentBox;
+        for (const key of Object.keys(r.database)) {
+            this.database[key] = new onceMap(r.database[key]);
         }
-        return !f;
-    }
-    listenDOMEvent() {
-        let f = (type) => {
-            return (e) => {
-                let { target } = e;
-                const g = {
-                    model: this.model,
-                    event: e,
-                    srcTarget: target,
-                    currentTarget: target,
-                    watcher: this,
-                    flush: this.delayFlush,
-                    stop: false
-                };
-                for (let current = target; current; current = current.parentElement) {
-                    const $ref = Reflect.get(current, '$ref');
-                    if ($ref) {
-                        g.currentTarget = current;
-                        new Promise(res => res(null)).then(() => (!g.stop) && $ref.emit(type, g));
-                    }
-                }
-                this.flushAfterEvent && this.delayFlush();
-            };
-        };
-        const sT = new Set(this.listened);
-        for (let name of sT) {
-            document.addEventListener(name, f(name), true);
-        }
+        this.calc();
     }
 }
-export class vHTML extends vElement {
-    constructor(tag, html) {
-        super(tag);
-        this.html = '';
-        this.html = html;
-    }
-}
-export function f() {
-    return function h(tag, comment = '') {
-        return new vElement(tag);
-    };
-}
-export function g() {
-    return function ht(tag, html) {
-        return new vHTML(tag, html);
-    };
-}
-export async function sleep(ms, val) {
-    return new Promise((resolve) => {
-        setTimeout(resolve, ms, val);
+const h = f();
+const wt = new Watcher({
+    target: document.querySelector('#app'),
+    root(data) {
+        return ui_app(data);
+    },
+    data: new Data,
+    listened: ['change', 'click']
+});
+function ui_app(data) {
+    return h('div').addChildren([
+        ui_selections(data).setStyle({ gridArea: 'a', borderRight: '1px solid black' }),
+        ui_equip_detail(data).setStyle({ gridArea: 'b', borderRight: '1px solid black' }),
+        ui_results(data).setStyle({ gridArea: 'd', borderTop: '1px solid black' }),
+        ui_controls(data).setStyle({ gridArea: 'c' }),
+    ]).setStyle({
+        display: 'grid',
+        gridTemplateAreas: `
+			'a b c'
+			'd d d'
+		`,
+        gridTemplateColumns: 'repeat(3,1fr)'
     });
 }
-function shiftRef(ot, nt) {
-    const r = ot.$ref;
-    if (r) {
-        Reflect.set(r, '$ref', nt);
-        nt.$ref = r;
-        ot.$ref = null;
+function ui_equip_detail(data) {
+    const de = data.detailedEquip;
+    if (!de) {
+        return h('div');
     }
-    return r;
+    return h('div').addChildren([
+        h('h1').addText(de.name),
+        h('div').addText(de.tag.map(x => '#' + x).join(' ')),
+        h('div').addText('[其他]' + de.other.join(';')),
+        ...de.data.map(x => h('div').addChildren([
+            h('span').addText(x.type + ':'),
+            h('span').addText('值'),
+            h('input').setAttributes({ type: 'number' })
+                .setValue(x.value).on('change', ({ srcTarget, model }) => {
+                x.value = srcTarget.valueAsNumber;
+                model.calc();
+            }),
+            h('span').addText('适用次数'),
+            h('input').setAttributes({ type: 'number' })
+                .setValue(x.times).on('change', ({ srcTarget, model }) => {
+                x.times = srcTarget.valueAsNumber;
+                model.calc();
+            }),
+        ]))
+    ]).setStyle({ textAlign: 'center' });
 }
-function rend(node) {
-    let res;
-    if (node instanceof vElement) {
-        res = document.createElement(node.tag);
-        const { children, style, attributes, properties } = node;
-        const rst = res.style;
-        for (const [key, value] of Object.entries(style)) {
-            rst[key] = value;
-        }
-        if (node instanceof vHTML) {
-            res.innerHTML = node.html;
-        }
-        else {
-            for (const child of children) {
-                res.appendChild(rend(child));
+function ui_selections(data) {
+    return h('div').addChildren(slotNames.map(x => ui_selections_piece(data, x))).setStyle({ cursor: 'pointer' });
+}
+function ui_selections_piece(data, slot) {
+    var _a, _b;
+    const hl = data.highlight.toLowerCase();
+    return h('div').addChildren([
+        h('span').addText(`${slot}`),
+        h('select').addChildren([
+            h('option').addText('<无>'),
+            ...[...data.queryEquipMap(slot).values()].map(eq => h('option').addText(eq.name).setAttributes({
+                title: `${eq.tag.map(x => '#' + x).join(' ')}`
+            }).setStyle({
+                color: (hl && eq.tag.findIndex(x => x.toLowerCase().includes(hl)) !== -1) ? 'orange' : ''
+            }))
+        ]).on('change', ({ model, srcTarget }) => {
+            const tmp = data.getEquipByName(srcTarget.value, slot);
+            if (!tmp) {
+                return;
             }
-        }
-        for (let [key, value] of Object.entries(attributes)) {
-            isNul(value) || res.setAttribute(key, value + '');
-        }
-        for (let [key, value] of Object.entries(properties)) {
-            Reflect.set(res, key, value);
-        }
-    }
-    else {
-        res = document.createTextNode(node.data + '');
-    }
-    node.$ref = res;
-    Reflect.set(res, '$ref', node);
-    return res;
+            model.currentBox[slot] = tmp;
+            model.detailedEquip = tmp;
+        }).setValue((_b = (_a = data.currentBox[slot]) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '<无>')
+    ]);
 }
-function chidrenDiff(ocs, ncs, pr) {
-    let i = 0;
-    for (const l = Math.min(ocs.length, ncs.length); i < l; i++) {
-        singleElementDiff(ocs[i], ncs[i]);
+function ui_results(data) {
+    const dr = data.result;
+    if (dr) {
+        return h('div').addChildren([
+            h('h3').addText('搭配=' + dr.combination),
+            h('div').addChildren([
+                `倍率:${dr.detail.倍率.toFixed(2)}(技能攻击力:${((dr.detail.技能攻击力 - 1) * 100).toFixed(2)}%,攻击强化:${dr.detail.攻击强化.toFixed(0)})`,
+                h('br'),
+                `其他:${dr.detail.其他.join(' ')}`,
+                h('br'),
+                `标签:${dr.detail.标签.map(x => '#' + x).join(' ')}`
+            ])
+        ]);
     }
-    if (ocs.length === ncs.length) {
-        return;
-    }
-    if (ocs.length > ncs.length) {
-        for (const l = ocs.length; i < l; i++) {
-            const c = ocs[i];
-            if (c.$ref) {
-                Reflect.set(c.$ref, '$ref', null);
-                c.$ref.remove();
-                c.$ref = null;
-            }
-        }
-    }
-    else {
-        for (const l = ncs.length; i < l; i++) {
-            pr.appendChild(rend(ncs[i]));
-        }
-    }
+    return h('div');
 }
-function attrsDiff(type, ot, nt, $ref) {
-    const f = () => {
-        switch (type) {
-            case 'attributes':
-                {
-                    const keysSet = new Set([...Object.keys(ot.attributes), ...Object.keys(nt.attributes)]);
-                    for (const key of keysSet) {
-                        const v0 = nt.attributes[key];
-                        const v1 = ot.attributes[key];
-                        if (isNul(v0)) {
-                            $ref.removeAttribute(key);
-                        }
-                        else if (v0 !== v1) {
-                            $ref.setAttribute(key, v0 + '');
-                        }
-                    }
-                }
-                break;
-            case 'properties':
-                {
-                    const keysSet = new Set([...Object.keys(ot.properties), ...Object.keys(nt.properties)]);
-                    for (const key of keysSet) {
-                        if (key === '$ref')
-                            continue;
-                        const v0 = nt.properties[key];
-                        const v1 = ot.properties[key];
-                        if (v0 !== v1) {
-                            Reflect.set($ref, key, v0);
-                        }
-                    }
-                }
-                break;
-            case 'styles':
-                {
-                    const keysSet = new Set([...Object.keys(ot.style), ...Object.keys(nt.style)]);
-                    for (const key of keysSet) {
-                        const v0 = nt.style[key];
-                        const v1 = ot.style[key];
-                        if (isNul(v0)) {
-                            $ref.style[key] = '';
-                        }
-                        else if (v0 !== v1) {
-                            $ref.style[key] = v0 + '';
-                        }
-                    }
-                }
-                break;
-        }
-    };
-    new Promise(res => res(void 0)).then(() => f());
-}
-function singleElementDiff(ot, nt) {
-    const _ref = shiftRef(ot, nt);
-    if (!_ref)
-        return;
-    if (nt instanceof vHTML) {
-        if (!((ot instanceof vHTML) && (ot.tag === nt.tag) && (ot.html === nt.html))) {
-            _ref.replaceWith(rend(nt));
-        }
-    }
-    else if (ot instanceof vElement && nt instanceof vElement && ot.tag === nt.tag) {
-        const $ref = _ref;
-        chidrenDiff(ot.children, nt.children, $ref);
-        attrsDiff('attributes', ot, nt, $ref);
-        attrsDiff('styles', ot, nt, $ref);
-        attrsDiff('properties', ot, nt, $ref);
-    }
-    else if (ot instanceof vText && nt instanceof vText) {
-        if (nt.data !== ot.data) {
-            _ref.data = nt.data + '';
-        }
-    }
-    else {
-        _ref.replaceWith(rend(nt));
-    }
+function ui_controls(data) {
+    return h('div').addChildren([
+        h('div').addChildren([
+            h('span').addText('高亮标签'),
+            h('input').setValue(data.highlight).on('change', ({ model, srcTarget }) => {
+                model.highlight = srcTarget.value;
+            })
+        ]),
+        h('div').addChildren([
+            h('span').addText('攻击强化成长系数'),
+            h('input').setAttributes({ type: 'number' }).setValue(data.growth).on('change', ({ model, srcTarget }) => {
+                model.growth = srcTarget.valueAsNumber;
+            })
+        ]),
+        h('div').addChildren([
+            h('span').addText('攻击强化%'),
+            h('input').setAttributes({ type: 'number' }).setValue(data.攻击强化百分比).on('change', ({ model, srcTarget }) => {
+                model.攻击强化百分比 = srcTarget.valueAsNumber;
+            })
+        ]),
+        h('div').addChildren([
+            h('button').addText('导出json').on('click', ({ model }) => {
+                navigator.clipboard.writeText(model.exportJSON()).then(() => alert('已将json信息复制到剪贴板')).catch(() => alert('复制json信息失败'));
+            }),
+            h('button').addText('导入json').on('click', ({ model }) => {
+                navigator.clipboard.readText().then(x => model.importJSON(x)).then(() => alert('已根据剪贴的json信息构造出对应数据')).catch(() => alert('发生错误,请检查json'));
+            }),
+        ]),
+    ]);
 }
