@@ -1,4 +1,4 @@
-import { f, Watcher } from './ubf.js';
+import { f, Watcher } from '../ubf.js';
 import { onceMap } from './type.js';
 import { pure } from './util.js';
 import belts from './belts.js';
@@ -110,7 +110,9 @@ class Data {
         const r = pure();
         const keys = [
             'currentBox',
-            'database'
+            'database',
+            'growth',
+            '攻击强化百分比'
         ];
         for (const key of keys) {
             r[key] = this[key];
@@ -128,6 +130,8 @@ class Data {
     importJSON(s) {
         const r = JSON.parse(s);
         this.currentBox = r.currentBox;
+        this.growth = r.growth;
+        this.攻击强化百分比 = r.攻击强化百分比;
         for (const key of Object.keys(r.database)) {
             this.database[key] = new onceMap(r.database[key]);
         }
@@ -191,7 +195,9 @@ function ui_selections_piece(data, slot) {
     var _a, _b;
     const hl = data.highlight.toLowerCase();
     return h('div').addChildren([
-        h('span').addText(`${slot}`),
+        h('span').addText(`${slot}`).on('click', ({ model }) => {
+            model.detailedEquip = model.currentBox[slot];
+        }),
         h('select').addChildren([
             h('option').addText('<无>'),
             ...[...data.queryEquipMap(slot).values()].map(eq => h('option').addText(eq.name).setAttributes({
