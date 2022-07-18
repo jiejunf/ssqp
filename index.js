@@ -1,4 +1,4 @@
-import { f, Watcher } from '../ubf/index.js';
+import { f, Watcher } from './ubf.js';
 import { Character, onceMap } from './type.js';
 import { pure } from './util.js';
 import belts from './belts.js';
@@ -180,13 +180,13 @@ function ui_equip_detail(data) {
             h('span').addText('值'),
             h('input').setAttributes({ type: 'number' })
                 .setValue(x.value).on('change', ({ srcTarget, model }) => {
-                x.value = srcTarget.valueAsNumber;
-            }),
+                    x.value = srcTarget.valueAsNumber;
+                }),
             h('span').addText('适用次数'),
             h('input').setAttributes({ type: 'number' })
                 .setValue(x.times).on('change', ({ srcTarget, model }) => {
-                x.times = srcTarget.valueAsNumber;
-            }),
+                    x.times = srcTarget.valueAsNumber;
+                }),
         ]))
     ]).setStyle({ textAlign: 'center' });
 }
@@ -206,15 +206,15 @@ function ui_selections_piece(data, slot) {
             }))
         ])
             .on('change', ({ model, srcTarget }) => {
-            const tmp = data.getEquipByName(srcTarget.value, slot);
-            if (!tmp) {
-                return;
-            }
-            model.currentBox[slot] = tmp;
-            model.detailedEquip = tmp;
-        }).setValue((_b = (_a = data.currentBox[slot]) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '<无>').on('click', ({ model }) => {
-            model.detailedEquip = model.currentBox[slot];
-        })
+                const tmp = data.getEquipByName(srcTarget.value, slot);
+                if (!tmp) {
+                    return;
+                }
+                model.currentBox[slot] = tmp;
+                model.detailedEquip = tmp;
+            }).setValue((_b = (_a = data.currentBox[slot]) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '<无>').on('click', ({ model }) => {
+                model.detailedEquip = model.currentBox[slot];
+            })
     ]);
 }
 function ui_results(data) {
