@@ -1,4 +1,4 @@
-import { copy } from "./util";
+import { copy } from "./util.js";
 export function calculate(eqs, t, c) {
     c = copy(c);
     let 攻击强化 = 0;
