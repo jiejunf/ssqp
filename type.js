@@ -9,6 +9,29 @@ export class Equip {
         this.isMyth = false;
     }
 }
+export class Character {
+    constructor() {
+        this.elementIncrease = {
+            火: 250,
+            光: 250,
+            暗: 250,
+            冰: 250
+        };
+        this.dotStatePercent = {
+            出血: 0,
+            灼烧: 0,
+            感电: 0,
+            中毒: 0
+        };
+        this.dotStateIncrease = {
+            出血: 0,
+            灼烧: 0,
+            感电: 0,
+            中毒: 0
+        };
+        this.cd = 0.95;
+    }
+}
 export class onceMap extends Map {
     set(k, t) {
         if (this.has(k)) {
