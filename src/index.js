@@ -38,20 +38,7 @@ function keys(item) {
 class Data {
     constructor() {
         this.jsonInfo = '';
-        this.database = {
-            coats: coats.clone(),
-            pants: pants.clone(),
-            magicStones: magicStones.clone(),
-            supports: supports.clone(),
-            rings: rings.clone(),
-            bracelets: bracelets.clone(),
-            shoulders: shoulders.clone(),
-            weapons: weapons.clone(),
-            earrings: earrings.clone(),
-            belts: belts.clone(),
-            shoes: shoes.clone(),
-            necklace: necklaces.clone(),
-        };
+        this.database = this.dbInit();
         this.character = new Character;
         this.currentBox = pure();
         this.results = [];
@@ -85,6 +72,22 @@ class Data {
             }
         };
     }
+    dbInit() {
+        return {
+            coats: coats.clone(),
+            pants: pants.clone(),
+            magicStones: magicStones.clone(),
+            supports: supports.clone(),
+            rings: rings.clone(),
+            bracelets: bracelets.clone(),
+            shoulders: shoulders.clone(),
+            weapons: weapons.clone(),
+            earrings: earrings.clone(),
+            belts: belts.clone(),
+            shoes: shoes.clone(),
+            necklaces: necklaces.clone(),
+        };
+    }
     queryEquipMap(slot) {
         switch (slot) {
             case '上衣': return this.database.coats;
@@ -98,7 +101,7 @@ class Data {
             case '耳环': return this.database.earrings;
             case '腰带': return this.database.belts;
             case '鞋子': return this.database.shoes;
-            case '项链': return this.database.necklace;
+            case '项链': return this.database.necklaces;
         }
     }
     getEquipByName(name, slot) {
@@ -334,6 +337,12 @@ function ui_controls(data) {
             }),
             h('button').addText('清空').on('click', ({ model }) => {
                 model.clearResult();
+            })
+        ]),
+        h('br'),
+        h('div').addChildren([
+            h('button').addText('重置装备数据').on('click', ({ model }) => {
+                model.database = model.dbInit();
             })
         ]),
         h('br'),
