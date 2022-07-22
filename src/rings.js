@@ -1,6 +1,13 @@
-import { Equip, onceMap } from "./type.js";
+import { Equip, onceMap, dataWords } from "./type.js";
 let rings = new onceMap;
 let t;
+t = new Equip;
+t.name = '自定义装备';
+for (const word of dataWords) {
+    t.data.push({ type: word, value: 0, times: 1 });
+    t.data.push({ type: word, value: 0, times: 1 });
+}
+rings.set(t.name, t);
 t = new Equip;
 t.name = '守护龙的庇护-祝福';
 t.data.push({ type: '攻击强化', value: 4796, times: 1 });

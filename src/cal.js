@@ -10,6 +10,7 @@ export function calculate(eqs, t, c) {
     let 说明 = '';
     let cd = c.cd;
     let 异常收益 = 0;
+    let cdr = 1;
     for (const { data, tag, other } of eqs) {
         标签.push(...tag);
         其他.push(...other);
@@ -68,11 +69,12 @@ export function calculate(eqs, t, c) {
                     cd = cd * (1 + unit.value / 100 * unit.times);
                     break;
                 case '冷却恢复速度':
-                    cd = cd / (1 + unit.value / 100 * unit.times);
+                    cdr += unit.value / 100 * unit.times;
                     break;
             }
         }
     }
+    cd = cd / cdr;
     let p = '无';
     for (const [k, v] of Object.entries(c.elementIncrease)) {
         if (v > 最高属强) {

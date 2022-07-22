@@ -1,6 +1,13 @@
-import { Equip, onceMap } from "./type.js";
+import { Equip, onceMap, dataWords } from "./type.js";
 let necklaces = new onceMap;
 let t;
+t = new Equip;
+t.name = '自定义装备';
+for (const word of dataWords) {
+    t.data.push({ type: word, value: 0, times: 1 });
+    t.data.push({ type: word, value: 0, times: 1 });
+}
+necklaces.set(t.name, t);
 t = new Equip;
 t.name = '第一个黑桃-贵族';
 t.data.push({ type: '攻击强化', value: 3180, times: 1 });

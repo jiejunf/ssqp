@@ -9,6 +9,12 @@ export class Equip {
         this.isMyth = false;
     }
 }
+export const dataWords = [
+    '属强', '火强', '冰强', '光强', '暗强',
+    '中毒伤害', '灼烧伤害', '感电伤害', '出血伤害',
+    '中毒比例', '出血比例', '感电比例', '灼烧比例',
+    '技能攻击力', '攻击强化', '冷却时间', '冷却恢复速度',
+];
 export class Character {
     constructor() {
         this.elementIncrease = {

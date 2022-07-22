@@ -1,6 +1,13 @@
-import { Equip, onceMap } from "./type.js";
+import { Equip, onceMap, dataWords } from "./type.js";
 let belts = new onceMap;
 let t;
+t = new Equip;
+t.name = '自定义装备';
+for (const word of dataWords) {
+    t.data.push({ type: word, value: 0, times: 1 });
+    t.data.push({ type: word, value: 0, times: 1 });
+}
+belts.set(t.name, t);
 t = new Equip;
 t.name = '御雷腰带';
 t.data.push({ type: '攻击强化', value: 4523, times: 1 });

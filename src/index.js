@@ -38,20 +38,7 @@ function keys(item) {
 class Data {
     constructor() {
         this.jsonInfo = '';
-        this.database = {
-            coats: coats.clone(),
-            pants: pants.clone(),
-            magicStones: magicStones.clone(),
-            supports: supports.clone(),
-            rings: rings.clone(),
-            bracelets: bracelets.clone(),
-            shoulders: shoulders.clone(),
-            weapons: weapons.clone(),
-            earrings: earrings.clone(),
-            belts: belts.clone(),
-            shoes: shoes.clone(),
-            necklace: necklaces.clone(),
-        };
+        this.database = this.dbInit();
         this.character = new Character;
         this.currentBox = pure();
         this.results = [];
@@ -85,6 +72,22 @@ class Data {
             }
         };
     }
+    dbInit() {
+        return {
+            coats: coats.clone(),
+            pants: pants.clone(),
+            magicStones: magicStones.clone(),
+            supports: supports.clone(),
+            rings: rings.clone(),
+            bracelets: bracelets.clone(),
+            shoulders: shoulders.clone(),
+            weapons: weapons.clone(),
+            earrings: earrings.clone(),
+            belts: belts.clone(),
+            shoes: shoes.clone(),
+            necklaces: necklaces.clone(),
+        };
+    }
     queryEquipMap(slot) {
         switch (slot) {
             case '上衣': return this.database.coats;
@@ -98,7 +101,7 @@ class Data {
             case '耳环': return this.database.earrings;
             case '腰带': return this.database.belts;
             case '鞋子': return this.database.shoes;
-            case '项链': return this.database.necklace;
+            case '项链': return this.database.necklaces;
         }
     }
     getEquipByName(name, slot) {
@@ -131,7 +134,8 @@ class Data {
         }).filter(x => x);
         this.results.push({
             combination: eqs.map(x => `[${x.slot}]${x.name}`),
-            detail: calculate(eqs, this.growth * (1 + this.攻击强化百分比 / 100), this.character)
+            detail: calculate(eqs, this.growth * (1 + this.攻击强化百分比 / 100), this.character),
+            json: this.exportJSON()
         });
     }
     exportJSON() {
@@ -271,7 +275,13 @@ function ui_results(data) {
                     cursor: 'pointer',
                     userSelect: 'none'
                 }).setAttributes({ title: '点击两个搭配以比较装备的差异' }),
+                h('button').addText('导出json').on('click', () => {
+                    navigator.clipboard.writeText(dr.json).then(() => { alert('已成功复制json信息到剪贴板'); }).catch(() => { alert('数据导出失败'); });
+                }),
                 h('button').addText('删除').on('click', ({ flush }) => {
+                    if (!confirm('将删除结果条目，要继续吗？')) {
+                        return;
+                    }
                     drs.splice(i, 1);
                     flush();
                 }),
@@ -333,14 +343,20 @@ function ui_controls(data) {
                 model.calc();
             }),
             h('button').addText('清空').on('click', ({ model }) => {
+                if (!confirm('将清空全部结果，要继续吗?')) {
+                    return;
+                }
                 model.clearResult();
             })
         ]),
         h('br'),
         h('div').addChildren([
-            h('button').addText('导出json').on('click', ({ model }) => {
-                navigator.clipboard.writeText(model.exportJSON()).then(() => alert('已将json信息复制到剪贴板')).catch(() => alert('复制json信息失败'));
-            }),
+            h('button').addText('重置装备数据').on('click', ({ model }) => {
+                model.database = model.dbInit();
+            })
+        ]),
+        h('br'),
+        h('div').addChildren([
             h('button').addText('导入json').on('click', ({ model }) => {
                 navigator.clipboard.readText().then(x => model.importJSON(x)).then(() => alert('已根据剪贴的json信息构造出对应数据')).catch(() => alert('发生错误,请检查json'));
             }),
