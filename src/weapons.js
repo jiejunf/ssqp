@@ -11,7 +11,7 @@ weapons.set(t.name, t);
 t = new Equip;
 t.name = '吞噬本源武器';
 t.data.push({ type: '攻击强化', value: 5336, times: 1 });
-t.data.push({ type: '技能攻击力', value: 35, times: 1 });
+t.data.push({ type: '技能攻击力', value: 49, times: 1 });
 t.data.push({ type: '技能攻击力', value: 10, times: 1 });
 t.data.push({ type: '技能攻击力', value: 4, times: 1 });
 t.other = ["全技能等级+1(觉醒除外)", "自定义技能攻击力"];
