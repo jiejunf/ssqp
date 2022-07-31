@@ -26,6 +26,8 @@ supports.set(t.name, t);
 t = new Equip;
 t.name = '命运的魔法箱';
 t.data.push({ type: '攻击强化', value: 4528, times: 1 });
+t.data.push({ type: '攻击强化百分比', value: 3, times: 1 });
+t.data.push({ type: '属强', value: 12, times: 1 });
 t.tag = ['附魔翻倍'];
 t.other = ["附魔翻倍"];
 supports.set(t.name, t);

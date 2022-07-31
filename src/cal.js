@@ -1,5 +1,5 @@
 import { copy } from "./util.js";
-export function calculate(eqs, t, c) {
+export function calculate(eqs, growth, atkIncresePercent, c) {
     c = copy(c);
     let 攻击强化 = 0;
     let 技攻系数 = 1;
@@ -53,6 +53,15 @@ export function calculate(eqs, t, c) {
                 case '感电伤害':
                     c.dotStateIncrease.感电 += unit.value * unit.times;
                     break;
+                case '冷却时间':
+                    cd = cd * (1 + unit.value / 100 * unit.times);
+                    break;
+                case '冷却恢复速度':
+                    cdr += unit.value / 100 * unit.times;
+                    break;
+                case '攻击强化百分比':
+                    atkIncresePercent += unit.value * unit.times;
+                    break;
                 case '中毒比例':
                     c.dotStatePercent.中毒 += unit.value * unit.times;
                     break;
@@ -65,16 +74,10 @@ export function calculate(eqs, t, c) {
                 case '出血比例':
                     c.dotStatePercent.出血 += unit.value * unit.times;
                     break;
-                case '冷却时间':
-                    cd = cd * (1 + unit.value / 100 * unit.times);
-                    break;
-                case '冷却恢复速度':
-                    cdr += unit.value / 100 * unit.times;
-                    break;
             }
         }
     }
-    cd = cd / cdr;
+    cd /= cdr;
     let p = '无';
     for (const [k, v] of Object.entries(c.elementIncrease)) {
         if (v > 最高属强) {
@@ -97,7 +100,7 @@ export function calculate(eqs, t, c) {
         }
     }
     说明 += `${p};`;
-    攻击强化 *= t;
+    攻击强化 *= growth * (1 + atkIncresePercent / 100);
     return {
         攻击强化,
         '技能攻击力%': +((技攻系数 - 1) * 100).toFixed(2),

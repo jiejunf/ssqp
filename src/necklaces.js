@@ -55,7 +55,7 @@ t.data.push({ type: '攻击强化', value: 4876, times: 1 });
 t.data.push({ type: '技能攻击力', value: 10, times: 1 });
 t.tag = ['手搓', 'CD'];
 t.data.push({ type: '属强', value: +15, times: 1 });
-t.other = ["手搓非快捷栏技能时,CD-15%"];
+t.data.push({ type: '冷却时间', value: 15, times: 0 });
 necklaces.set(t.name, t);
 t = new Equip;
 t.name = '五感之灵项链';

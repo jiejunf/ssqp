@@ -134,7 +134,7 @@ class Data {
         }).filter(x => x);
         this.results.push({
             combination: eqs.map(x => `[${x.slot}]${x.name}`),
-            detail: calculate(eqs, this.growth * (1 + this.攻击强化百分比 / 100), this.character),
+            detail: calculate(eqs, this.growth, this.攻击强化百分比, this.character),
             json: this.exportJSON()
         });
     }
@@ -233,7 +233,9 @@ function ui_selections_piece(data, slot) {
             ...[...data.queryEquipMap(slot).values()].map(eq => h('option').setValue(eq.name).addText(`[${slot}]${eq.name}`).setAttributes({
                 title: `${eq.tag.map(x => '#' + x).join(' ')}`
             }).setStyle({
-                color: (hl && eq.tag.findIndex(x => x.toLowerCase().includes(hl)) !== -1) ? 'orange' : ''
+                color: (hl && ((eq.tag.findIndex(x => x.toLowerCase().includes(hl)) !== -1)
+                    ||
+                        (eq.data.findIndex(x => x.type.toLowerCase().includes(hl)) !== -1))) ? 'orange' : ''
             }))
         ])
             .on('change', ({ model, srcTarget }) => {
@@ -242,7 +244,7 @@ function ui_selections_piece(data, slot) {
         }).setValue((_b = (_a = data.getEquipByName(data.currentBox[slot], slot)) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '<无>').on('click', ({ model }) => {
             model.detailedEquip = model.getEquipByName(model.currentBox[slot], slot);
         })
-    ]);
+    ]).setStyle({ marginBottom: '5px' });
 }
 function ui_results(data) {
     const drs = data.results;

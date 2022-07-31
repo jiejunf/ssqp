@@ -27,7 +27,7 @@ t.name = '黑暗吞噬短靴';
 t.data.push({ type: '攻击强化', value: 4432 + (1347 - 808) * 2, times: 1 });
 t.data.push({ type: '技能攻击力', value: 10, times: 1 / 2 });
 t.data.push({ type: '冷却恢复速度', value: 30, times: 1 / 2 });
-t.tag = ['随机效果', '所有速度'];
+t.tag = ['随机效果', '所有速度', '中毒', '中毒伤害'];
 t.data.push({ type: '中毒伤害', value: +10, times: 1 });
 shoes.set(t.name, t);
 t = new Equip;
