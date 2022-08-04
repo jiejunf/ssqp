@@ -91,7 +91,7 @@ belts.set(t.name, t);
 t = new Equip;
 t.name = '音律的夙愿';
 t.data.push({ type: '攻击强化', value: 5336 + (2021 - 1482) * 2, times: 1 });
-t.data.push({ type: '冷却时间', value: 10, times: 1 });
+t.data.push({ type: '冷却时间', value: -10, times: 1 });
 t.data.push({ type: '攻击强化', value: 3260, times: 1 });
 t.tag = ['睡眠', '睡眠核心'];
 belts.set(t.name, t);

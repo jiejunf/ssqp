@@ -128,7 +128,7 @@ t = new Equip;
 t.name = '蒸汽朋克音速鞋';
 t.data.push({ type: '攻击强化', value: 4972, times: 1 });
 t.data.push({ type: '攻击强化', value: 385, times: 0 });
-t.data.push({ type: '冷却时间', value: 5, times: 1 });
+t.data.push({ type: '冷却时间', value: -5, times: 1 });
 t.tag = ['石化'];
 shoes.set(t.name, t);
 t = new Equip;
