@@ -139,6 +139,12 @@ t.data.push({ type: '技能攻击力', value: 2, times: 1 });
 t.data.push({ type: '暗强', value: +15, times: 1 });
 t.tag = ['特效'];
 shoes.set(t.name, t);
+t = new Equip;
+t.name = '赛博音速长靴';
+t.data.push({ type: '攻击强化', value: 2642, times: 1 });
+t.data.push({ type: '技能攻击力', value: 30, times: 1 });
+t.tag = ['攻击速度'];
+shoes.set(t.name, t);
 for (const v of shoes.values()) {
     v.slot = '鞋子';
     if (!v.isMyth) {

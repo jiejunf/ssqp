@@ -133,6 +133,14 @@ t.data.push({ type: '攻击强化', value: 3450, times: 1 });
 t.tag = ['火强'];
 t.data.push({ type: '火强', value: +65, times: 1 });
 pants.set(t.name, t);
+t = new Equip;
+t.name = '机械装甲下装';
+t.data.push({ type: '攻击强化', value: 3988, times: 1 });
+t.tag = ['速度'];
+t.other = ['增幅/强化等级(取总和120计算)'];
+t.data.push({ type: '属强', value: 10, times: 1 });
+t.data.push({ type: '攻击强化', value: 272 * 20, times: 1 });
+pants.set(t.name, t);
 for (const v of pants.values()) {
     v.slot = '下装';
     if (!v.isMyth) {

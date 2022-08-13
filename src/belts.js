@@ -138,6 +138,14 @@ t.data.push({ type: '攻击强化', value: 889, times: 3 });
 t.tag = ['回蓝', 'mp套'];
 t.other = ["mp消耗量+100%"];
 belts.set(t.name, t);
+t = new Equip;
+t.name = '增援号令腰带';
+t.data.push({ type: '攻击强化', value: 3988, times: 1 });
+t.data.push({ type: '攻击强化', value: 4001, times: 1 });
+t.data.push({ type: '冷却恢复速度', value: 15, times: 1 });
+t.other = ['攻击范围增加'];
+t.tag = ['攻击范围'];
+belts.set(t.name, t);
 for (const v of belts.values()) {
     v.slot = '腰带';
     if (!v.isMyth) {

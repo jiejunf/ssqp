@@ -130,6 +130,13 @@ t.data.push({ type: '攻击强化', value: 4528 + (1616 - 1078) * 2, times: 1 })
 t.data.push({ type: '攻击强化', value: 3853, times: 1 });
 t.tag = ['恢复hp', '召唤'];
 supports.set(t.name, t);
+t = new Equip;
+t.name = '光学工程眼镜';
+t.data.push({ type: '攻击强化', value: 4528, times: 1 });
+t.data.push({ type: '攻击强化', value: 3557, times: 1 });
+t.data.push({ type: '技能攻击力', value: 5, times: 1 });
+t.tag = ['品级相关'];
+supports.set(t.name, t);
 for (const v of supports.values()) {
     v.slot = '左槽';
     if (!v.isMyth) {

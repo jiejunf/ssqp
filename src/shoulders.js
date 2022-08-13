@@ -131,6 +131,13 @@ t.name = '钢筋铁骨披肩';
 t.data.push({ type: '攻击强化', value: 3180, times: 1 });
 t.tag = ['搬砖'];
 shoulders.set(t.name, t);
+t = new Equip;
+t.name = '金属齿轮护肩';
+t.data.push({ type: '攻击强化', value: 3450, times: 1 });
+t.data.push({ type: '冷却恢复速度', value: 25, times: 1 });
+t.data.push({ type: '攻击强化', value: 2223, times: 1 });
+t.tag = ['CD'];
+shoulders.set(t.name, t);
 for (const v of shoulders.values()) {
     v.slot = '护肩';
     if (!v.isMyth) {

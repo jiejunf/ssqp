@@ -131,6 +131,12 @@ t.data.push({ type: '攻击强化', value: 4796 + (1616 - 1212) * 2, times: 1 })
 t.data.push({ type: '攻击强化', value: 963, times: 4 });
 t.tag = ['所有速度'];
 magicStone.set(t.name, t);
+t = new Equip;
+t.name = '完成型动力控制装置';
+t.data.push({ type: '攻击强化', value: 2910, times: 1 });
+t.data.push({ type: '属强', value: 10, times: 4 });
+t.tag = ['属性强化'];
+magicStone.set(t.name, t);
 for (const v of magicStone.values()) {
     v.slot = '右槽';
     if (!v.isMyth) {

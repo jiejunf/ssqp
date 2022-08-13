@@ -147,6 +147,12 @@ t.data.push({ type: '攻击强化', value: 4258 + (1616 - 943) * 2, times: 1 });
 t.data.push({ type: '攻击强化', value: 2964, times: 1 });
 t.tag = ['移动速度', '跳跃'];
 bracelets.set(t.name, t);
+t = new Equip;
+t.name = '动力导航包';
+t.data.push({ type: '攻击强化', value: 3988, times: 1 });
+t.data.push({ type: '攻击强化', value: 2816, times: 1 });
+t.tag = ['低血', '保护罩', '低血核心'];
+bracelets.set(t.name, t);
 for (const v of bracelets.values()) {
     v.slot = '手镯';
     if (!v.isMyth) {

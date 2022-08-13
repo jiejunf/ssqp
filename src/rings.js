@@ -147,6 +147,14 @@ t.tag = ['自身出血', 'CD'];
 t.data.push({ type: '冷却恢复速度', value: +10, times: 1 });
 t.data.push({ type: '技能攻击力', value: 5, times: 1 });
 rings.set(t.name, t);
+t = new Equip;
+t.name = '能量搜索环';
+t.data.push({ type: '攻击强化', value: 3988, times: 1 });
+t.data.push({ type: '技能攻击力', value: 7, times: 1 });
+t.data.push({ type: '攻击强化', value: 2816, times: 1 });
+t.data.push({ type: '攻击强化', value: 700, times: 1 });
+t.tag = ['属强相关', '属抗相关'];
+rings.set(t.name, t);
 for (const v of rings.values()) {
     v.slot = '戒指';
     if (!v.isMyth) {
