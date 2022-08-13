@@ -37,6 +37,7 @@ function keys(item) {
 }
 class Data {
     constructor() {
+        this.VERSION = '20220813';
         this.jsonInfo = '';
         this.database = this.dbInit();
         this.character = new Character;
@@ -145,7 +146,8 @@ class Data {
             'database',
             'growth',
             '攻击强化百分比',
-            'character'
+            'character',
+            'VERSION'
         ];
         for (const key of keys) {
             r[key] = this[key];
@@ -163,6 +165,10 @@ class Data {
     importJSON(s) {
         var _a, _b, _c, _d;
         const r = JSON.parse(s);
+        if (r.VERSION !== this.VERSION) {
+            alert('导入错误:版本不对应');
+            return;
+        }
         this.currentBox = (_a = r.currentBox) !== null && _a !== void 0 ? _a : this.currentBox;
         this.growth = (_b = r.growth) !== null && _b !== void 0 ? _b : this.growth;
         this.攻击强化百分比 = (_c = r.攻击强化百分比) !== null && _c !== void 0 ? _c : this.攻击强化百分比;
