@@ -14,7 +14,6 @@ import shoulders from "./shoulders.js";
 import supports from "./supports.js";
 import weapons from "./weapons.js";
 import { calculate } from "./cal.js";
-const prefix = '105级装备数值速算';
 const slotNames = [
     '上衣',
     '下装',
@@ -42,7 +41,8 @@ class Data {
         this.database = this.dbInit();
         this.character = new Character;
         this.currentBox = pure();
-        this.results = [];
+        this.calResults = [];
+        this.calResultBaseline = 0;
         this._growth = 1;
         this._detailedEquip = void 0;
         this.highlight = '';
@@ -127,16 +127,17 @@ class Data {
         this._攻击强化百分比 = value;
     }
     clearResult() {
-        this.results.length = 0;
+        this.calResults.length = 0;
     }
-    calc() {
+    calc(combName = this.calResults.length.toString()) {
         const eqs = Object.entries(this.currentBox).map(([slot, eqName]) => {
             return this.getEquipByName(eqName, slot);
         }).filter(x => x);
-        this.results.push({
+        this.calResults.push({
             combination: eqs.map(x => `[${x.slot}]${x.name}`),
             detail: calculate(eqs, this.growth, this.攻击强化百分比, this.character),
-            json: this.exportJSON()
+            json: this.exportJSON(),
+            name: combName
         });
     }
     exportJSON() {
@@ -253,10 +254,16 @@ function ui_selections_piece(data, slot) {
     ]).setStyle({ marginBottom: '5px' });
 }
 function ui_results(data) {
-    const drs = data.results;
+    const drs = data.calResults;
     if (drs.length) {
         return h('div').addChildren(drs.map((dr, i) => {
             return h('div').addChildren([
+                h('input').setValue(dr.name).setAttributes({
+                    title: '搭配名称',
+                    placeholder: '搭配名称'
+                }).on('change', ({ flush, srcTarget }) => {
+                    dr.name = srcTarget.value;
+                }),
                 h('strong').addText('搭配=').addChildren(dr.combination.map((x, i) => {
                     const sp = h('span');
                     sp.addChild(h('span').addText(x).setStyle({
@@ -283,6 +290,9 @@ function ui_results(data) {
                     cursor: 'pointer',
                     userSelect: 'none'
                 }).setAttributes({ title: '点击两个搭配以比较装备的差异' }),
+                h('button').addText('设为基准').on('click', ({ model }) => {
+                    model.calResultBaseline = dr.detail.倍率;
+                }),
                 h('button').addText('导出json').on('click', () => {
                     navigator.clipboard.writeText(dr.json).then(() => { alert('已成功复制json信息到剪贴板'); }).catch(() => { alert('数据导出失败'); });
                 }),
@@ -294,7 +304,7 @@ function ui_results(data) {
                     flush();
                 }),
                 h('div').addChildren([
-                    h('strong').setStyle({ color: 'red' }).addText(`倍率:${dr.detail.倍率.toFixed(2)}`),
+                    h('strong').setStyle({ color: 'red' }).addText(data.calResultBaseline ? `比例:${(dr.detail.倍率 / data.calResultBaseline * 100).toFixed(2)}%` : `倍率:${dr.detail.倍率.toFixed(2)}`),
                     h('br'),
                     dr.detail.说明,
                     h('br'),
@@ -350,23 +360,88 @@ function ui_controls(data) {
             h('button').addText('计算').on('click', ({ model }) => {
                 model.calc();
             }),
-            h('button').addText('清空').on('click', ({ model }) => {
+            h('button').addText('清空结果').on('click', ({ model }) => {
                 if (!confirm('将清空全部结果，要继续吗?')) {
                     return;
                 }
                 model.clearResult();
+            }),
+            h('button').addText('清空基准').on('click', ({ model }) => {
+                model.calResultBaseline = 0;
             })
         ]),
-        h('br'),
         h('div').addChildren([
             h('button').addText('重置装备数据').on('click', ({ model }) => {
                 model.database = model.dbInit();
             })
         ]),
-        h('br'),
         h('div').addChildren([
             h('button').addText('导入json').on('click', ({ model }) => {
                 navigator.clipboard.readText().then(x => model.importJSON(x)).then(() => alert('已根据剪贴的json信息构造出对应数据')).catch(() => alert('发生错误,请检查json'));
+            }),
+        ]),
+        h('div').addChildren([
+            h('button').addText('从txt导入计算结果').on('click', () => {
+                document.getElementById('fileAcc').click();
+            }),
+            h('input').setAttributes({
+                type: 'file',
+                id: 'fileAcc',
+                accept: 'text/plain'
+            }).on('change', ({ model, srcTarget }) => {
+                var _a;
+                const file = (_a = srcTarget.files) === null || _a === void 0 ? void 0 : _a[0];
+                if (!file) {
+                    return;
+                }
+                const fr = new FileReader;
+                fr.onload = () => {
+                    const content = fr.result;
+                    let status = 0;
+                    let combName = '';
+                    for (let line of content.split('\n')) {
+                        line = line.trim();
+                        if (!line) {
+                            continue;
+                        }
+                        if (status === 0) {
+                            if (line.startsWith('#')) {
+                                combName = line.slice(1);
+                            }
+                            else {
+                                throw new Error('格式错误:不为#开头');
+                            }
+                            status = 1;
+                        }
+                        else {
+                            model.importJSON(line);
+                            model.calc(combName);
+                            status = 0;
+                        }
+                    }
+                };
+                fr.readAsText(file);
+            }).setStyle({ display: 'none' }),
+            h('button').addText('下载所有计算结果').on('click', ({ model }) => {
+                if (!confirm('要继续吗?')) {
+                    return;
+                }
+                const texts = [];
+                const names = [];
+                for (const result of model.calResults) {
+                    names.push(result.name);
+                    texts.push('#' + result.name, result.json);
+                }
+                const text_str = texts.join('\n');
+                const url = URL.createObjectURL(new Blob([
+                    text_str
+                ], {
+                    type: 'text/plain'
+                }));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '搭配#' + names.join('_') + '.txt';
+                a.click();
             }),
         ]),
     ]);
