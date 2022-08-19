@@ -44,7 +44,7 @@ class Data {
         this.calResults = [];
         this.calResultBaseline = 0;
         this.$105史诗等级 = 1;
-        this._detailedEquip = void 0;
+        this.detailedEquip = void 0;
         this.highlight = '';
         this.攻击强化百分比 = 0;
         this.diffRing = new class {
@@ -107,12 +107,6 @@ class Data {
     }
     getEquipByName(name, slot) {
         return this.queryEquipMap(slot).get(name);
-    }
-    get detailedEquip() {
-        return this._detailedEquip;
-    }
-    set detailedEquip(value) {
-        this._detailedEquip = value;
     }
     clearResult() {
         this.calResults.length = 0;
@@ -318,7 +312,7 @@ function ui_controls(data) {
             })
         ]),
         h('div').addChildren([
-            h('span').addText('105史诗等级'),
+            h('span').addText('105史诗等级(均)'),
             h('input').setAttributes({ type: 'number' }).setValue(data.$105史诗等级).on('change', ({ model, srcTarget }) => {
                 model.$105史诗等级 = srcTarget.valueAsNumber;
             })

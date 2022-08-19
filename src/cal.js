@@ -12,11 +12,16 @@ export function calculate(eqs, lv105, atkIncresePercent, c) {
     let 异常收益 = 0;
     let cdr = 1;
     const $105等级总和 = lv105 * 4;
-    const noMyth = eqs.findIndex(x => x.isMyth) === -1;
-    const $105收益_衣镯耳 = noMyth ? Math.floor($105等级总和 / 40) * 3 : 0;
-    const $105收益_等级额外收益 = Math.floor($105等级总和 / 40) + ($105等级总和 > 240 ? 1 : 0);
+    const noHasMyth = eqs.findIndex(x => x.isMyth) === -1;
+    const $105收益_衣镯耳 = noHasMyth ? Math.floor($105等级总和 / 40) * 3 : 0;
+    const $105收益_单件等级额外收益 = Math.floor($105等级总和 / 40) + ($105等级总和 > 240 ? 1 : 0);
     const 攻击强化系数表 = [0, 3, 5, 8, 10, 13, 16, 18, 21, 36, 34, 36, 43, 46, 49, 51, 54, 56, 59, 74, 76, 79, 81, 84, 86, 88, 91, 93, 96, 109, 111, 113, 116, 118, 121, 123, 125, 128, 130, 143, 145, 148, 150, 152, 154, 156, 159, 161, 163, 174, 176, 178, 179, 181, 183, 185, 187, 188, 190, 199, 201];
+    if (lv105 > 攻击强化系数表.length || lv105 < 0) {
+        alert('你的战斗力太论外了!你到底是谁?');
+        throw '你的战斗力太论外了!你到底是谁?';
+    }
     const 攻击强化系数 = 攻击强化系数表[lv105 - 1] / 134.75 + 1;
+    技攻系数 *= (1 + $105收益_单件等级额外收益 / 100) ** eqs.filter(eq => eq.slot !== '武器' && !eq.isMyth).length;
     for (const { data, tag, other } of eqs) {
         标签.push(...tag);
         其他.push(...other);
@@ -107,7 +112,6 @@ export function calculate(eqs, lv105, atkIncresePercent, c) {
     }
     说明 += `${p};`;
     技攻系数 *= 1 + $105收益_衣镯耳 / 100;
-    技攻系数 *= 1 + $105收益_等级额外收益 / 100;
     攻击强化 *= 攻击强化系数 * (1 + atkIncresePercent / 100);
     return {
         攻击强化,
