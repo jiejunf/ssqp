@@ -22,8 +22,8 @@ export function calculate(eqs, lv105, atkIncresePercent, c) {
         throw '神话不可以带两件以上哦!';
     }
     if (lv105 > 攻击强化系数表.length || lv105 < 1) {
-        alert('你的战斗力太论外了!你到底是谁?');
-        throw '你的战斗力太论外了!你到底是谁?';
+        alert('你的战斗力太论外了!你到底是谁?(105史诗等级不在支持范围内容)');
+        throw '你的战斗力太论外了!你到底是谁?(105史诗等级不在支持范围内容)';
     }
     const 攻击强化系数 = 攻击强化系数表[lv105 - 1] / 134.75 + 1;
     技攻系数 *= (1 + $105收益_单件等级额外收益 / 100) ** eqs.filter(eq => eq.slot !== '武器' && !eq.isMyth).length;
