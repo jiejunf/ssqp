@@ -36,17 +36,17 @@ function keys(item) {
 }
 class Data {
     constructor() {
-        this.VERSION = '20220813';
+        this.VERSION = '20220819';
         this.jsonInfo = '';
         this.database = this.dbInit();
         this.character = new Character;
         this.currentBox = pure();
         this.calResults = [];
         this.calResultBaseline = 0;
-        this._growth = 1;
+        this.$105史诗等级 = 1;
         this._detailedEquip = void 0;
         this.highlight = '';
-        this._攻击强化百分比 = 0;
+        this.攻击强化百分比 = 0;
         this.diffRing = new class {
             constructor() {
                 this.index = 0;
@@ -108,23 +108,11 @@ class Data {
     getEquipByName(name, slot) {
         return this.queryEquipMap(slot).get(name);
     }
-    get growth() {
-        return this._growth;
-    }
-    set growth(value) {
-        this._growth = value;
-    }
     get detailedEquip() {
         return this._detailedEquip;
     }
     set detailedEquip(value) {
         this._detailedEquip = value;
-    }
-    get 攻击强化百分比() {
-        return this._攻击强化百分比;
-    }
-    set 攻击强化百分比(value) {
-        this._攻击强化百分比 = value;
     }
     clearResult() {
         this.calResults.length = 0;
@@ -135,7 +123,7 @@ class Data {
         }).filter(x => x);
         this.calResults.push({
             combination: eqs.map(x => `[${x.slot}]${x.name}`),
-            detail: calculate(eqs, this.growth, this.攻击强化百分比, this.character),
+            detail: calculate(eqs, this.$105史诗等级, this.攻击强化百分比, this.character),
             json: this.exportJSON(),
             name: combName
         });
@@ -145,7 +133,7 @@ class Data {
         const keys = [
             'currentBox',
             'database',
-            'growth',
+            '$105史诗等级',
             '攻击强化百分比',
             'character',
             'VERSION'
@@ -171,7 +159,7 @@ class Data {
             return;
         }
         this.currentBox = (_a = r.currentBox) !== null && _a !== void 0 ? _a : this.currentBox;
-        this.growth = (_b = r.growth) !== null && _b !== void 0 ? _b : this.growth;
+        this.$105史诗等级 = (_b = r.$105史诗等级) !== null && _b !== void 0 ? _b : this.$105史诗等级;
         this.攻击强化百分比 = (_c = r.攻击强化百分比) !== null && _c !== void 0 ? _c : this.攻击强化百分比;
         this.character = (_d = r.character) !== null && _d !== void 0 ? _d : this.character;
         for (const key of Object.keys(r.database)) {
@@ -330,9 +318,9 @@ function ui_controls(data) {
             })
         ]),
         h('div').addChildren([
-            h('span').addText('攻击强化成长系数'),
-            h('input').setAttributes({ type: 'number' }).setValue(data.growth).on('change', ({ model, srcTarget }) => {
-                model.growth = srcTarget.valueAsNumber;
+            h('span').addText('105史诗等级'),
+            h('input').setAttributes({ type: 'number' }).setValue(data.$105史诗等级).on('change', ({ model, srcTarget }) => {
+                model.$105史诗等级 = srcTarget.valueAsNumber;
             })
         ]),
         h('div').addChildren([
@@ -419,6 +407,8 @@ function ui_controls(data) {
                             status = 0;
                         }
                     }
+                    fr.onload = null;
+                    srcTarget.value = '';
                 };
                 fr.readAsText(file);
             }).setStyle({ display: 'none' }),
