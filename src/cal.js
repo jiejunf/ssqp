@@ -1,5 +1,6 @@
 import { copy } from "./util.js";
 export function calculate(eqs, lv105, atkIncresePercent, c) {
+    lv105 = Math.floor(lv105);
     c = copy(c);
     let 攻击强化 = 0;
     let 技攻系数 = 1;
@@ -16,7 +17,7 @@ export function calculate(eqs, lv105, atkIncresePercent, c) {
     const $105收益_衣镯耳 = noHasMyth ? Math.floor($105等级总和 / 40) * 3 : 0;
     const $105收益_单件等级额外收益 = Math.floor($105等级总和 / 40) + ($105等级总和 > 240 ? 1 : 0);
     const 攻击强化系数表 = [0, 3, 5, 8, 10, 13, 16, 18, 21, 36, 34, 36, 43, 46, 49, 51, 54, 56, 59, 74, 76, 79, 81, 84, 86, 88, 91, 93, 96, 109, 111, 113, 116, 118, 121, 123, 125, 128, 130, 143, 145, 148, 150, 152, 154, 156, 159, 161, 163, 174, 176, 178, 179, 181, 183, 185, 187, 188, 190, 199, 201];
-    if (lv105 > 攻击强化系数表.length || lv105 < 0) {
+    if (lv105 > 攻击强化系数表.length || lv105 < 1) {
         alert('你的战斗力太论外了!你到底是谁?');
         throw '你的战斗力太论外了!你到底是谁?';
     }
