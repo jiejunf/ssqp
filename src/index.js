@@ -119,7 +119,7 @@ class Data {
             combination: eqs.map(x => `[${x.slot}]${x.name}`),
             detail: calculate(eqs, this.$105史诗等级, this.攻击强化百分比, this.character),
             json: this.exportJSON(),
-            name: combName
+            combName: combName
         });
     }
     exportJSON() {
@@ -273,11 +273,11 @@ var ui_components;
         if (drs.length) {
             return h('div').addChildren(drs.map((dr, i) => {
                 return h('div').addChildren([
-                    h('input').setValue(dr.name).setAttributes({
+                    h('input').setValue(dr.combName).setAttributes({
                         title: '搭配名称',
                         placeholder: '搭配名称'
                     }).on('change', ({ srcTarget }) => {
-                        dr.name = srcTarget.value;
+                        dr.combName = srcTarget.value;
                     }),
                     h('strong').addText('搭配=').addChildren(dr.combination.map((x, i) => {
                         const sp = h('span');
@@ -403,21 +403,36 @@ var ui_components;
                     }
                     model.clearResult();
                 }),
+                h('button').addText('结果排序').on('click', ({ model }) => {
+                    model.calResults.sort((a, b) => b.detail.倍率 - a.detail.倍率);
+                }),
                 h('button').addText('清空基准').on('click', ({ model }) => {
                     model.calResultBaseline = 0;
                 })
             ]),
             h('div').addChildren([
-                h('button').addText('重置装备数据').on('click', ({ model }) => {
-                    model.database = model.dbInit();
-                })
+                h('button').addText('重置当前装备数据').on('click', ({ model }) => {
+                    if (confirm('确定要重置当前装备数据吗')) {
+                        model.database = model.dbInit();
+                    }
+                }),
+                h('button').addText('重置所有结果中的装备数据').on('click', ({ model }) => {
+                    if (!confirm('确定要重置所有结果中的装备数据吗')) {
+                        return;
+                    }
+                    const oldResSize = model.calResults.length;
+                    model.calResults.forEach(r => {
+                        model.importJSON(r.json);
+                        model.database = model.dbInit();
+                        model.calc(r.combName);
+                    });
+                    model.calResults.splice(0, oldResSize);
+                }),
             ]),
             h('div').addChildren([
                 h('button').addText('导入json').on('click', ({ model }) => {
                     navigator.clipboard.readText().then(x => model.importJSON(x)).then(() => alert('已根据剪贴的json信息构造出对应数据')).catch(() => alert('发生错误,请检查json'));
                 }),
-            ]),
-            h('div').addChildren([
                 h('button').addText('从txt导入计算结果').on('click', () => {
                     document.getElementById('fileAcc').click();
                 }),
@@ -468,8 +483,8 @@ var ui_components;
                     const texts = [];
                     const names = [];
                     for (const result of model.calResults) {
-                        names.push(result.name);
-                        texts.push('#' + result.name, result.json);
+                        names.push(result.combName);
+                        texts.push('#' + result.combName, result.json);
                     }
                     const text_str = texts.join('\n');
                     const url = URL.createObjectURL(new Blob([
