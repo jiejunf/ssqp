@@ -58,4 +58,26 @@ export function tableSize(table) {
     }
     return len;
 }
+export async function sleep(ms, val) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms, val);
+    });
+}
+async function loopAwait(f, print = false, testor = (t, count) => true, sleepTime = 500) {
+    let count = 0;
+    while (true) {
+        try {
+            const result = await f(count);
+            count++;
+            print && console.log(result);
+            await sleep(sleepTime);
+            if (testor(result, count)) {
+                return result;
+            }
+        }
+        catch (e) {
+            print && console.log(e);
+        }
+    }
+}
 

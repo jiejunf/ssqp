@@ -1,5 +1,5 @@
 import { f, Watcher } from "../ubf/index.js";
-import { Character, onceMap } from "./type.js";
+import { Character, eqAttrTypeWords, onceMap } from "./type.js";
 import { pure } from "./util.js";
 import belts from "./belts.js";
 import bracelets from "./bracelets.js";
@@ -36,7 +36,7 @@ function keys(item) {
 }
 class Data {
     constructor() {
-        this.VERSION = '20220819';
+        this.VERSION = '20220824';
         this.jsonInfo = '';
         this.database = this.dbInit();
         this.character = new Character;
@@ -114,7 +114,7 @@ class Data {
     calc(combName = this.calResults.length.toString()) {
         const eqs = Object.entries(this.currentBox).map(([slot, eqName]) => {
             return this.getEquipByName(eqName, slot);
-        }).filter(x => x);
+        }).filter(x => !!x);
         this.calResults.push({
             combination: eqs.map(x => `[${x.slot}]${x.name}`),
             detail: calculate(eqs, this.$105史诗等级, this.攻击强化百分比, this.character),
@@ -130,7 +130,7 @@ class Data {
             '$105史诗等级',
             '攻击强化百分比',
             'character',
-            'VERSION'
+            'VERSION',
         ];
         for (const key of keys) {
             r[key] = this[key];
@@ -149,8 +149,7 @@ class Data {
         var _a, _b, _c, _d;
         const r = JSON.parse(s);
         if (r.VERSION !== this.VERSION) {
-            alert('导入错误:版本不对应');
-            return;
+            return alert('错误:版本不对应!');
         }
         this.currentBox = (_a = r.currentBox) !== null && _a !== void 0 ? _a : this.currentBox;
         this.$105史诗等级 = (_b = r.$105史诗等级) !== null && _b !== void 0 ? _b : this.$105史诗等级;
@@ -188,6 +187,38 @@ var ui_components;
         });
     }
     ui_components.ui_app = ui_app;
+    function ui_equip_attr_detail(attr, meta) {
+        return h('div').addChildren([
+            h('select').setValue(attr.type).addChildren(eqAttrTypeWords.map(x => h('option').addText(x)))
+                .on('change', ({ flush, srcTarget }) => {
+                if (confirm('将要修改词条类型,要继续吗')) {
+                    attr.type = srcTarget.value;
+                }
+                else {
+                    srcTarget.value = attr.type;
+                }
+                flush();
+            }),
+            h('input').setAttributes({ type: 'number', title: '值', placeholder: '值' }).setValue(attr.value).on('change', ({ flush, srcTarget }) => {
+                attr.value = srcTarget.valueAsNumber;
+                flush();
+            }),
+            '*',
+            h('input').setAttributes({ type: 'number', title: '次数', placeholder: '次数' }).setValue(attr.times).on('change', ({ flush, srcTarget }) => {
+                attr.times = srcTarget.valueAsNumber;
+                flush();
+            }),
+            h('button').addText('删除').on('click', ({ flush }) => {
+                if (!confirm('将要删除装备属性,要继续吗')) {
+                    return;
+                }
+                if (meta.attrs[meta.index] === attr) {
+                    meta.attrs.splice(meta.index, 1);
+                    flush();
+                }
+            })
+        ]);
+    }
     function ui_equip_detail(data) {
         const de = data.detailedEquip;
         if (!de) {
@@ -198,19 +229,18 @@ var ui_components;
             h('strong').addText(de.slot),
             h('div').addText(de.tag.map(x => '#' + x).join(' ')),
             h('div').addText('[其他]' + de.other.join(';')),
-            ...de.data.map(x => h('div').addChildren([
-                h('span').addText(x.type + ':'),
-                h('span').addText('值'),
-                h('input').setAttributes({ type: 'number' })
-                    .setValue(x.value).on('change', ({ srcTarget, model }) => {
-                    x.value = srcTarget.valueAsNumber;
-                }),
-                h('span').addText('适用次数'),
-                h('input').setAttributes({ type: 'number' })
-                    .setValue(x.times).on('change', ({ srcTarget, model }) => {
-                    x.times = srcTarget.valueAsNumber;
-                }),
-            ]))
+            h('button').addText('添加词条').on('click', ({ flush }) => {
+                de.attrs.push({
+                    type: '攻击强化',
+                    times: 1,
+                    value: 0
+                });
+                flush();
+            }),
+            ...de.attrs.map((x, i, arr) => ui_equip_attr_detail(x, {
+                attrs: arr,
+                index: i
+            }))
         ]).setStyle({ textAlign: 'center' });
     }
     function ui_selections(data) {
@@ -227,7 +257,7 @@ var ui_components;
                 }).setStyle({
                     color: (hl && ((eq.tag.findIndex(x => x.toLowerCase().includes(hl)) !== -1)
                         ||
-                            (eq.data.findIndex(x => x.type.toLowerCase().includes(hl)) !== -1))) ? 'orange' : ''
+                            (eq.attrs.findIndex(x => x.type.toLowerCase().includes(hl)) !== -1))) ? 'orange' : ''
                 }))
             ])
                 .on('change', ({ model, srcTarget }) => {
@@ -246,7 +276,7 @@ var ui_components;
                     h('input').setValue(dr.name).setAttributes({
                         title: '搭配名称',
                         placeholder: '搭配名称'
-                    }).on('change', ({ flush, srcTarget }) => {
+                    }).on('change', ({ srcTarget }) => {
                         dr.name = srcTarget.value;
                     }),
                     h('strong').addText('搭配=').addChildren(dr.combination.map((x, i) => {
@@ -295,9 +325,11 @@ var ui_components;
                         h('br'),
                         dr.detail.说明,
                         h('br'),
-                        `技能攻击力:${dr.detail['技能攻击力%']}%,攻击强化:${dr.detail.攻击强化.toFixed(0)},属强:${dr.detail.最高属强},异常伤害增加:${(dr.detail.最高异常伤害提升 * 100).toFixed(0)}%`,
+                        `技能攻击力:${dr.detail['技能攻击力']}%,攻击强化:${dr.detail.攻击强化.toFixed(0)},属强:${dr.detail.最高属强},异常伤害增加:${(dr.detail.最高异常伤害提升 * 100).toFixed(0)}%`,
                         h('br'),
-                        `冷却时间减少%:${100 - dr.detail['冷却时间%']}`,
+                        `冷却时间减少%:${100 - dr.detail['冷却时间']}`,
+                        h('br'),
+                        `攻击速度加成:${dr.detail.攻击速度}(攻速鞋适用的攻速为${dr.detail.攻击速度 + data.character.装备以外_攻速鞋适用攻速}),移动速度加成:${dr.detail.移动速度},施放速度加成:${dr.detail.施放速度}`,
                         h('br'),
                         `其他:${dr.detail.其他.join(' ')}`,
                         h('br'),
@@ -330,18 +362,36 @@ var ui_components;
             ]),
             h('div').addChildren([
                 h('span').addText('冷却减少%'),
-                h('input').setAttributes({ type: 'number' }).setValue((1 - data.character.cd) * 100 >>> 0).on('change', ({ model, srcTarget }) => {
-                    model.character.cd = +(1 - srcTarget.valueAsNumber / 100).toFixed(2);
+                h('input').setAttributes({ type: 'number' }).setValue((1 - data.character.冷却) * 100 >>> 0).on('change', ({ model, srcTarget }) => {
+                    model.character.冷却 = +(1 - srcTarget.valueAsNumber / 100).toFixed(2);
                 })
             ]),
             h('div').addChildren([
-                h('strong').addText('固有属强'),
-                ...Object.entries(data.character.elementIncrease).map(([k, v]) => h('span').addChildren([
+                h('strong').addText('固有属强').on('click', ({ model }) => {
+                    const val = prompt('一键修改所有属强值');
+                    if (!val) {
+                        return;
+                    }
+                    const nval = +val;
+                    if (nval >= 0) {
+                        model.character.固有属强.火 = nval;
+                        model.character.固有属强.冰 = nval;
+                        model.character.固有属强.光 = nval;
+                        model.character.固有属强.暗 = nval;
+                    }
+                }).setAttributes({ title: '点击以修改所有属强值' }).setStyle({ cursor: 'pointer' }),
+                ...Object.entries(data.character.固有属强).map(([k, v]) => h('span').addChildren([
                     h('span').addText(k),
                     h('input').setAttributes({ type: 'number' }).setValue(v).on('change', ({ model, srcTarget }) => {
-                        model.character.elementIncrease[k] = srcTarget.valueAsNumber;
+                        model.character.固有属强[k] = srcTarget.valueAsNumber;
                     })
                 ]))
+            ]),
+            h('div').addChildren([
+                h('strong').addText('攻速鞋计入的装备外攻速'),
+                h('input').setAttributes({ type: 'number' }).setValue(data.character.装备以外_攻速鞋适用攻速).on('change', ({ model, srcTarget }) => {
+                    data.character.装备以外_攻速鞋适用攻速 = srcTarget.valueAsNumber;
+                })
             ]),
             h('div').addChildren([
                 h('button').addText('计算').on('click', ({ model }) => {

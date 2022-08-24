@@ -3,39 +3,45 @@ export class Equip {
     constructor() {
         this.name = '';
         this.slot = '上衣';
-        this.data = [];
+        this.attrs = [];
         this.other = [];
         this.tag = [];
         this.isMyth = false;
     }
 }
-export const dataWords = [
+export const eqAttrTypeWords = [
     '属强', '火强', '冰强', '光强', '暗强',
     '中毒伤害', '灼烧伤害', '感电伤害', '出血伤害',
     '中毒比例', '出血比例', '感电比例', '灼烧比例',
-    '技能攻击力', '攻击强化', '冷却时间', '冷却恢复速度', '攻击强化百分比'
+    '技能攻击力', '攻击强化', '冷却时间', '冷却恢复速度',
+    '移动速度', '攻击速度', '施放速度', '所有速度', '攻击强化百分比'
 ];
 export class Character {
     constructor() {
-        this.elementIncrease = {
-            火: 250,
-            光: 250,
-            暗: 250,
-            冰: 250
+        this.固有属强 = {
+            火: 308,
+            光: 308,
+            暗: 308,
+            冰: 308
         };
-        this.dotStatePercent = {
+        this.异常伤害比例 = {
             出血: 0,
             灼烧: 0,
             感电: 0,
             中毒: 0
         };
-        this.dotStateIncrease = {
+        this.异常伤害提升率 = {
             出血: 0,
             灼烧: 0,
             感电: 0,
             中毒: 0
         };
-        this.cd = 0.95;
+        this.冷却 = 0.95;
+        this.装备以外_攻速鞋适用攻速 = 28;
+        this.固有防御 = {
+            物理: 0,
+            魔法: 0
+        };
     }
 }
 export class onceMap extends Map {
