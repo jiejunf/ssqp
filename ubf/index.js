@@ -48,7 +48,7 @@ export class vElement {
     }
     addClass(c) {
         let oc = (this.attributes.class || '') + ' ' + c;
-        let s = new Set(oc.split(/\s/).filter(x => x));
+        let s = new Set(oc.split(/\s/).filter(x => !!x));
         this.setAttributes({ class: [...s].join(' ') });
         return this;
     }
