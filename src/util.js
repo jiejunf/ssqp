@@ -27,7 +27,7 @@ export function copy(item) {
     else {
         r = Object.create(null);
     }
-    for (let key of Object.keys(item)) {
+    for (const key of Object.keys(item)) {
         let value = Reflect.get(item, key);
         if (value && typeof value === 'object') {
             value = copy(value);

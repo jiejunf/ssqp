@@ -73,6 +73,30 @@ class Data {
             }
         };
     }
+    importColgList(x) {
+        const dict = {
+            '武器': '武器',
+            '上衣': '上衣',
+            '头肩': '护肩',
+            '腰带': '腰带',
+            '下装': '下装',
+            '鞋子': '鞋子',
+            '项链': '项链',
+            '戒指': '戒指',
+            '手镯': '手镯',
+            '辅助装备': '左槽',
+            '魔法石': '右槽',
+            '耳环': '耳环',
+        };
+        for (const line of x.split(/\r?\n/).map(x => x.trim()).filter(x => !!x)) {
+            const [eqSlot, eqName] = line.split('———');
+            const trEqSlot = dict[eqSlot];
+            if ((!trEqSlot) || (!eqName)) {
+                throw '错误,请检查清单';
+            }
+            this.currentBox[trEqSlot] = eqName;
+        }
+    }
     dbInit() {
         return {
             coats: coats.clone(),
@@ -276,9 +300,10 @@ var ui_components;
                     h('input').setValue(dr.combName).setAttributes({
                         title: '搭配名称',
                         placeholder: '搭配名称'
-                    }).on('change', ({ srcTarget }) => {
+                    }).on('change', ({ srcTarget, flush }) => {
                         dr.combName = srcTarget.value;
-                    }),
+                        flush();
+                    }).setStyle({ width: `${dr.combName.length + 1}rem` }),
                     h('strong').addText('搭配=').addChildren(dr.combination.map((x, i) => {
                         const sp = h('span');
                         sp.addChild(h('span').addText(x).setStyle({
@@ -323,13 +348,10 @@ var ui_components;
                         h('br'),
                         `105史诗平均等级:${data.$105史诗等级}`,
                         h('br'),
-                        dr.detail.说明,
-                        h('br'),
+                        h('pre').addText(dr.detail.说明).setStyle({ fontSize: '1rem', margin: '0', padding: '0' }),
                         `技能攻击力:${dr.detail['技能攻击力']}%,攻击强化:${dr.detail.攻击强化.toFixed(0)},属强:${dr.detail.最高属强},异常伤害增加:${(dr.detail.最高异常伤害提升 * 100).toFixed(0)}%`,
                         h('br'),
                         `冷却时间减少%:${100 - dr.detail['冷却时间']}`,
-                        h('br'),
-                        `攻击速度加成:${dr.detail.攻击速度}(攻速鞋适用的攻速为${dr.detail.攻击速度 + data.character.装备以外_攻速鞋适用攻速}),移动速度加成:${dr.detail.移动速度},施放速度加成:${dr.detail.施放速度}`,
                         h('br'),
                         `其他:${dr.detail.其他.join(' ')}`,
                         h('br'),
@@ -430,8 +452,11 @@ var ui_components;
                 }),
             ]),
             h('div').addChildren([
+                h('button').addText('导入colg模拟器装备清单').on('click', ({ model }) => {
+                    navigator.clipboard.readText().then(x => model.importColgList(x)).then(() => alert('已从剪贴板导入colg模拟器清单')).catch(e => alert(e));
+                }),
                 h('button').addText('导入json').on('click', ({ model }) => {
-                    navigator.clipboard.readText().then(x => model.importJSON(x)).then(() => alert('已根据剪贴的json信息构造出对应数据')).catch(() => alert('发生错误,请检查json'));
+                    navigator.clipboard.readText().then(x => model.importJSON(x)).then(() => alert('已根据剪贴板的json信息构造出对应数据')).catch(() => alert('发生错误,请检查json'));
                 }),
                 h('button').addText('从txt导入计算结果').on('click', () => {
                     document.getElementById('fileAcc').click();
