@@ -154,9 +154,16 @@ t.tag = ['所有速度'];
 magicStone.set(t.name, t);
 t = new Equip;
 t.name = '完成型动力控制装置';
-t.attrs.push({ type: '攻击强化', value: 2910, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 2910 + (808 - 269) * 2, times: 1 });
 t.attrs.push({ type: '属强', value: 10, times: 4 });
 t.tag = ['属性强化'];
+magicStone.set(t.name, t);
+t = new Equip;
+t.name = '与胜利约定的时间';
+t.attrs.push({ type: '攻击强化', value: 4796, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 445, times: 10 });
+t.attrs.push({ type: '移动速度', value: 8, times: 1 });
+t.tag = ['低血'];
 magicStone.set(t.name, t);
 for (const v of magicStone.values()) {
     v.slot = '右槽';

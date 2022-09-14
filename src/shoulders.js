@@ -154,6 +154,13 @@ t.attrs.push({ type: '冷却恢复速度', value: 25, times: 1 });
 t.attrs.push({ type: '攻击强化', value: 2223, times: 1 });
 t.tag = ['CD'];
 shoulders.set(t.name, t);
+t = new Equip;
+t.name = '欢愉中的热望';
+t.attrs.push({ type: '攻击强化', value: 5066, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 1778, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 741, times: 4 });
+t.tag = ['骰子点数'];
+shoulders.set(t.name, t);
 for (const v of shoulders.values()) {
     v.slot = '护肩';
     if (!v.isMyth) {

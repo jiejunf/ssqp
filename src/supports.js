@@ -147,6 +147,12 @@ t.attrs.push({ type: '施放速度', value: 7.5, times: 1 });
 t.attrs.push({ type: '移动速度', value: 5, times: 1 });
 t.tag = ['品级相关'];
 supports.set(t.name, t);
+t = new Equip;
+t.name = '无谋而合理的作战';
+t.attrs.push({ type: '攻击强化', value: 4258, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 4446, times: 1 });
+t.tag = ['mp条件'];
+supports.set(t.name, t);
 for (const v of supports.values()) {
     v.slot = '左槽';
     if (!v.isMyth) {

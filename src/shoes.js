@@ -162,7 +162,15 @@ t = new Equip;
 t.name = '赛博音速长靴';
 t.attrs.push({ type: '攻击强化', value: 2642, times: 1 });
 t.attrs.push({ type: '技能攻击力', value: 30, times: 1 });
-t.tag = ['攻击速度'];
+t.tag = ['攻击速度', '攻速鞋'];
+shoes.set(t.name, t);
+t = new Equip;
+t.name = '朝向消亡的脚步';
+t.attrs.push({ type: '攻击强化', value: 4432, times: 1 });
+t.attrs.push({ type: '技能攻击力', value: 13, times: 1 });
+t.attrs.push({ type: '属强', value: 15, times: 1 });
+t.tag = ['异常鞋'];
+t.other = ['异常结算加速'];
 shoes.set(t.name, t);
 for (const v of shoes.values()) {
     v.attrs.push({ type: '移动速度', value: 4, times: 1 });

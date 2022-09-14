@@ -1,6 +1,8 @@
 import { f, Watcher } from "../ubf/index.js";
 import { Character, eqAttrTypeWords, onceMap } from "./type.js";
 import { pure } from "./util.js";
+import { calculate } from "./cal.js";
+//===标准装备===
 import belts from "./belts.js";
 import bracelets from "./bracelets.js";
 import coats from "./coats.js";
@@ -13,8 +15,20 @@ import shoes from "./shoes.js";
 import shoulders from "./shoulders.js";
 import supports from "./supports.js";
 import weapons from "./weapons.js";
-import { calculate } from "./cal.js";
-const slotNames = [
+//===贴膜装备===
+import ex_belts from "./ex_belts.js";
+import ex_bracelets from "./ex_bracelets.js";
+import ex_coats from "./ex_coats.js";
+import ex_earrings from "./ex_earrings.js";
+import ex_magicStones from "./ex_magicStones.js";
+import ex_necklaces from "./ex_necklaces.js";
+import ex_pants from "./ex_pants.js";
+import ex_rings from "./ex_rings.js";
+import ex_shoes from "./ex_shoes.js";
+import ex_shoulders from "./ex_shoulders.js";
+import ex_supports from "./ex_supports.js";
+import ex_weapons from "./ex_weapons.js";
+const normalSlotNames = [
     '上衣',
     '下装',
     '护肩',
@@ -28,6 +42,20 @@ const slotNames = [
     '耳环',
     '武器'
 ];
+const extraSlotNames = [
+    /*'ex上衣',
+    'ex下装',
+    'ex护肩',
+    'ex腰带',
+    'ex鞋子',*/
+    'ex手镯',
+    'ex戒指',
+    'ex项链',
+    /*'ex左槽',
+    'ex右槽',
+    'ex耳环',
+    'ex武器'*/
+];
 function has(item, key) {
     return key in item;
 }
@@ -36,17 +64,20 @@ function keys(item) {
 }
 class Data {
     constructor() {
-        this.VERSION = '20220824';
+        this.VERSION = '20220906';
         this.jsonInfo = '';
         this.database = this.dbInit();
+        this.databaseEx = this.exDbInit();
         this.character = new Character;
-        this.currentBox = pure();
+        this.currentNormalBox = pure();
+        this.currentExtraBox = pure();
         this.calResults = [];
         this.calResultBaseline = 0;
         this.$105史诗等级 = 1;
         this.detailedEquip = void 0;
         this.highlight = '';
         this.攻击强化百分比 = 0;
+        this.equipShowMode = '标准';
         this.diffRing = new class {
             constructor() {
                 this.index = 0;
@@ -94,7 +125,7 @@ class Data {
             if ((!trEqSlot) || (!eqName)) {
                 throw '错误,请检查清单';
             }
-            this.currentBox[trEqSlot] = eqName;
+            this.currentNormalBox[trEqSlot] = eqName;
         }
     }
     dbInit() {
@@ -113,7 +144,23 @@ class Data {
             necklaces: necklaces.clone(),
         };
     }
-    queryEquipMap(slot) {
+    exDbInit() {
+        return {
+            coats: ex_coats.clone(),
+            pants: ex_pants.clone(),
+            magicStones: ex_magicStones.clone(),
+            supports: ex_supports.clone(),
+            rings: ex_rings.clone(),
+            bracelets: ex_bracelets.clone(),
+            shoulders: ex_shoulders.clone(),
+            weapons: ex_weapons.clone(),
+            earrings: ex_earrings.clone(),
+            belts: ex_belts.clone(),
+            shoes: ex_shoes.clone(),
+            necklaces: ex_necklaces.clone(),
+        };
+    }
+    queryNormalEquipMap(slot) {
         switch (slot) {
             case '上衣': return this.database.coats;
             case '下装': return this.database.pants;
@@ -129,19 +176,41 @@ class Data {
             case '项链': return this.database.necklaces;
         }
     }
-    getEquipByName(name, slot) {
-        return this.queryEquipMap(slot).get(name);
+    getNormalEquipByName(name, slot) {
+        return this.queryNormalEquipMap(slot).get(name);
+    }
+    queryExtraEquipMap(slot) {
+        switch (slot) {
+            case 'ex上衣': return this.databaseEx.coats;
+            case 'ex下装': return this.databaseEx.pants;
+            case 'ex右槽': return this.databaseEx.magicStones;
+            case 'ex左槽': return this.databaseEx.supports;
+            case 'ex戒指': return this.databaseEx.rings;
+            case 'ex手镯': return this.databaseEx.bracelets;
+            case 'ex护肩': return this.databaseEx.shoulders;
+            case 'ex武器': return this.databaseEx.weapons;
+            case 'ex耳环': return this.databaseEx.earrings;
+            case 'ex腰带': return this.databaseEx.belts;
+            case 'ex鞋子': return this.databaseEx.shoes;
+            case 'ex项链': return this.databaseEx.necklaces;
+        }
+    }
+    getExtraEquipByName(name, slot) {
+        return this.queryExtraEquipMap(slot).get(name);
     }
     clearResult() {
         this.calResults.length = 0;
     }
     calc(combName = this.calResults.length.toString()) {
-        const eqs = Object.entries(this.currentBox).map(([slot, eqName]) => {
-            return this.getEquipByName(eqName, slot);
+        const normalEqs = Object.entries(this.currentNormalBox).map(([slot, eqName]) => {
+            return this.getNormalEquipByName(eqName, slot);
+        }).filter(x => !!x);
+        const extraEqs = Object.entries(this.currentExtraBox).map(([slot, eqName]) => {
+            return this.getExtraEquipByName(eqName, slot);
         }).filter(x => !!x);
         this.calResults.push({
-            combination: eqs.map(x => `[${x.slot}]${x.name}`),
-            detail: calculate(eqs, this.$105史诗等级, this.攻击强化百分比, this.character),
+            combination: [...normalEqs, ...extraEqs].map(x => `[${x.slot}]${x.name}`),
+            detail: calculate(normalEqs, extraEqs, this.$105史诗等级, this.攻击强化百分比, this.character),
             json: this.exportJSON(),
             combName: combName
         });
@@ -149,8 +218,10 @@ class Data {
     exportJSON() {
         const r = pure();
         const keys = [
-            'currentBox',
+            'currentNormalBox',
+            'currentExtraBox',
             'database',
+            'databaseEx',
             '$105史诗等级',
             '攻击强化百分比',
             'character',
@@ -170,17 +241,21 @@ class Data {
         return v;
     }
     importJSON(s) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         const r = JSON.parse(s);
         if (r.VERSION !== this.VERSION) {
             return alert('错误:版本不对应!');
         }
-        this.currentBox = (_a = r.currentBox) !== null && _a !== void 0 ? _a : this.currentBox;
-        this.$105史诗等级 = (_b = r.$105史诗等级) !== null && _b !== void 0 ? _b : this.$105史诗等级;
-        this.攻击强化百分比 = (_c = r.攻击强化百分比) !== null && _c !== void 0 ? _c : this.攻击强化百分比;
-        this.character = (_d = r.character) !== null && _d !== void 0 ? _d : this.character;
+        this.currentNormalBox = (_a = r.currentNormalBox) !== null && _a !== void 0 ? _a : this.currentNormalBox;
+        this.currentExtraBox = (_b = r.currentExtraBox) !== null && _b !== void 0 ? _b : this.currentExtraBox;
+        this.$105史诗等级 = (_c = r.$105史诗等级) !== null && _c !== void 0 ? _c : this.$105史诗等级;
+        this.攻击强化百分比 = (_d = r.攻击强化百分比) !== null && _d !== void 0 ? _d : this.攻击强化百分比;
+        this.character = (_e = r.character) !== null && _e !== void 0 ? _e : this.character;
         for (const key of Object.keys(r.database)) {
             this.database[key] = new onceMap(r.database[key]);
+        }
+        for (const key of Object.keys(r.databaseEx)) {
+            this.databaseEx[key] = new onceMap(r.databaseEx[key]);
         }
     }
 }
@@ -198,16 +273,17 @@ var ui_components;
     function ui_app(data) {
         return h('div').addChildren([
             ui_selections(data).setStyle({ gridArea: 'a', borderRight: '1px solid black' }),
-            ui_equip_detail(data).setStyle({ gridArea: 'b', borderRight: '1px solid black' }),
+            ui_equip_detail(data).setStyle({ gridArea: 'b' }),
             ui_results(data).setStyle({ gridArea: 'd', borderTop: '1px solid black' }),
-            ui_controls(data).setStyle({ gridArea: 'c' }),
+            ui_controls(data).setStyle({ gridArea: 'c', borderTop: '1px solid black', padding: '3px 0' }),
         ]).setStyle({
             display: 'grid',
             gridTemplateAreas: `
-			'a b c'
-			'd d d'
+			'a b'
+			'c c'
+			'd d'
 		`,
-            gridTemplateColumns: 'repeat(3,1fr)'
+            gridTemplateColumns: 'repeat(2,1fr)'
         });
     }
     ui_components.ui_app = ui_app;
@@ -268,15 +344,38 @@ var ui_components;
         ]).setStyle({ textAlign: 'center' });
     }
     function ui_selections(data) {
-        return h('div').addChildren(slotNames.map(x => ui_selections_piece(data, x))).setStyle({ cursor: 'pointer' });
+        return h('div').addChildren([
+            (() => {
+                if (data.equipShowMode === '标准') {
+                    return h('div').addChildren(normalSlotNames.map(x => ui_selections_normal_piece(data, x)));
+                }
+                else {
+                    return h('div').addChildren(extraSlotNames.map(x => ui_selections_extra_piece(data, x)));
+                }
+            })(),
+            h('button').addText(`当前装备列表:[${data.equipShowMode}],点击切换`).on('click', ({ model }) => {
+                switch (model.equipShowMode) {
+                    case '标准':
+                        model.equipShowMode = '贴膜';
+                        break;
+                    default:
+                        model.equipShowMode = '标准';
+                        break;
+                }
+            })
+        ]).setStyle({
+            cursor: 'pointer',
+            display: 'grid',
+            gridTemplateColumns: '9fr 3fr'
+        });
     }
-    function ui_selections_piece(data, slot) {
+    function ui_selections_normal_piece(data, slot) {
         var _a, _b;
         const hl = data.highlight.toLowerCase();
         return h('div').addChildren([
             h('select').addChildren([
                 h('option').setValue(`<无>`).addText(`[${slot}]<无>`),
-                ...[...data.queryEquipMap(slot).values()].map(eq => h('option').setValue(eq.name).addText(`[${slot}]${eq.name}`).setAttributes({
+                ...[...data.queryNormalEquipMap(slot).values()].map(eq => h('option').setValue(eq.name).addText(`[${slot}]${eq.name}`).setAttributes({
                     title: `${eq.tag.map(x => '#' + x).join(' ')}`
                 }).setStyle({
                     color: (hl && ((eq.tag.findIndex(x => x.toLowerCase().includes(hl)) !== -1)
@@ -285,10 +384,32 @@ var ui_components;
                 }))
             ])
                 .on('change', ({ model, srcTarget }) => {
-                model.currentBox[slot] = srcTarget.value;
-                model.detailedEquip = model.getEquipByName(srcTarget.value, slot);
-            }).setValue((_b = (_a = data.getEquipByName(data.currentBox[slot], slot)) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '<无>').on('click', ({ model }) => {
-                model.detailedEquip = model.getEquipByName(model.currentBox[slot], slot);
+                model.currentNormalBox[slot] = srcTarget.value;
+                model.detailedEquip = model.getNormalEquipByName(srcTarget.value, slot);
+            }).setValue((_b = (_a = data.getNormalEquipByName(data.currentNormalBox[slot], slot)) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '<无>').on('click', ({ model }) => {
+                model.detailedEquip = model.getNormalEquipByName(model.currentNormalBox[slot], slot);
+            })
+        ]).setStyle({ marginBottom: '5px' });
+    }
+    function ui_selections_extra_piece(data, slot) {
+        var _a, _b;
+        const hl = data.highlight.toLowerCase();
+        return h('div').addChildren([
+            h('select').addChildren([
+                h('option').setValue(`<无>`).addText(`[${slot}]<无>`),
+                ...[...data.queryExtraEquipMap(slot).values()].map(eq => h('option').setValue(eq.name).addText(`[${slot}]${eq.name}`).setAttributes({
+                    title: `${eq.tag.map(x => '#' + x).join(' ')}`
+                }).setStyle({
+                    color: (hl && ((eq.tag.findIndex(x => x.toLowerCase().includes(hl)) !== -1)
+                        ||
+                            (eq.attrs.findIndex(x => x.type.toLowerCase().includes(hl)) !== -1))) ? 'orange' : ''
+                }))
+            ])
+                .on('change', ({ model, srcTarget }) => {
+                model.currentExtraBox[slot] = srcTarget.value;
+                model.detailedEquip = model.getExtraEquipByName(srcTarget.value, slot);
+            }).setValue((_b = (_a = data.getExtraEquipByName(data.currentExtraBox[slot], slot)) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '<无>').on('click', ({ model }) => {
+                model.detailedEquip = model.getExtraEquipByName(model.currentExtraBox[slot], slot);
             })
         ]).setStyle({ marginBottom: '5px' });
     }

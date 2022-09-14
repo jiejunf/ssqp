@@ -151,6 +151,13 @@ t.attrs.push({ type: '属强', value: 15, times: 1 });
 t.attrs.push({ type: '所有速度', value: 3, times: 5 });
 t.tag = ['速度', 'CD', '属强相关'];
 necklaces.set(t.name, t);
+t = new Equip;
+t.name = '奋发者的意念';
+t.attrs.push({ type: '攻击强化', value: 4258, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 356, times: 10 });
+t.attrs.push({ type: '属强', value: 10, times: 1 });
+t.tag = ['特效加强'];
+necklaces.set(t.name, t);
 for (const v of necklaces.values()) {
     v.slot = '项链';
     if (!v.isMyth) {

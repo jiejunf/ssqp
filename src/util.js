@@ -63,7 +63,7 @@ export async function sleep(ms, val) {
         setTimeout(resolve, ms, val);
     });
 }
-async function loopAwait(f, print = false, testor = (t, count) => true, sleepTime = 500) {
+export async function loopAwait(f, print = false, testor = (t, count) => true, sleepTime = 500) {
     let count = 0;
     while (true) {
         try {
@@ -79,5 +79,22 @@ async function loopAwait(f, print = false, testor = (t, count) => true, sleepTim
             print && console.log(e);
         }
     }
+}
+export function strTag(constStr, ...inputStr) {
+    let res = '';
+    for (let i = 0, l = constStr.length - 1; i < l; i++) {
+        res += constStr[i] + inputStr[i];
+    }
+    res += constStr[constStr.length - 1];
+    return res;
+}
+export function encodeComnTag(constStr, ...inputStr) {
+    let res = '';
+    for (let i = 0, l = constStr.length - 1; i < l; i++) {
+        res += constStr[i] + encodeURIComponent(inputStr[i]);
+    }
+    res += constStr[constStr.length - 1];
+    res;
+    return res;
 }
 

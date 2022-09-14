@@ -8,6 +8,14 @@ export class Equip {
         this.tag = [];
         this.isMyth = false;
     }
+    攻施速模板(n, t) {
+        this.attrs.push({ type: '攻击速度', value: n, times: t });
+        this.attrs.push({ type: '施放速度', value: n * 1.5, times: t });
+    }
+    移攻施速模板(n, t) {
+        this.攻施速模板(n, t);
+        this.attrs.push({ type: '移动速度', value: n, times: t });
+    }
 }
 export const eqAttrTypeWords = [
     '属强', '火强', '冰强', '光强', '暗强',

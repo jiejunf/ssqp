@@ -145,8 +145,15 @@ t.attrs.push({ type: '攻击强化', value: 3988, times: 1 });
 t.tag = ['速度'];
 t.other = ['增幅/强化等级(取总和120计算)'];
 t.attrs.push({ type: '属强', value: 10, times: 1 });
-t.attrs.push({ type: '攻击强化', value: 272 * 20, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 272, times: 20 });
 t.attrs.push({ type: '所有速度', value: 2, times: 10 });
+pants.set(t.name, t);
+t = new Equip;
+t.name = '领导胜利的长裤';
+t.attrs.push({ type: '攻击强化', value: 5604, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 296, times: 10 });
+t.attrs.push({ type: '移动速度', value: 8, times: 1 });
+t.tag = ['削韧'];
 pants.set(t.name, t);
 for (const v of pants.values()) {
     v.slot = '下装';
