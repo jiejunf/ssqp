@@ -13,3 +13,11 @@ input {
 html {
     font-size: 13px;
 }
+
+.slotName:hover {
+    background: red;
+}
+
+select {
+    width: 12rem;
+}
