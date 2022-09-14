@@ -78,6 +78,16 @@ class Data {
         this.highlight = '';
         this.攻击强化百分比 = 0;
         this.equipShowMode = '标准';
+        this.jsonKeys = [
+            'currentNormalBox',
+            'currentExtraBox',
+            'database',
+            'databaseEx',
+            '$105史诗等级',
+            '攻击强化百分比',
+            'character',
+            'VERSION',
+        ];
         this.diffRing = new class {
             constructor() {
                 this.index = 0;
@@ -217,22 +227,12 @@ class Data {
     }
     exportJSON() {
         const r = pure();
-        const keys = [
-            'currentNormalBox',
-            'currentExtraBox',
-            'database',
-            'databaseEx',
-            '$105史诗等级',
-            '攻击强化百分比',
-            'character',
-            'VERSION',
-        ];
-        for (const key of keys) {
+        for (const key of this.jsonKeys) {
             r[key] = this[key];
         }
-        let v = JSON.stringify(r, function (_key, value) {
-            if (value instanceof Set || value instanceof Map) {
-                return [...value];
+        let v = JSON.stringify(r, (_, value) => {
+            if (value instanceof onceMap) {
+                return { __prototype: 'onceMap', content: [...value] };
             }
             else {
                 return value;
@@ -241,21 +241,22 @@ class Data {
         return v;
     }
     importJSON(s) {
-        var _a, _b, _c, _d, _e;
-        const r = JSON.parse(s);
+        var _a;
+        const r = JSON.parse(s, (_, value) => {
+            if (value.__prototype === 'onceMap') {
+                return new onceMap(value.content);
+            }
+            else {
+                return value;
+            }
+        });
+        console.log(r);
         if (r.VERSION !== this.VERSION) {
-            return alert('错误:版本不对应!');
+            alert('错误:版本不对应!');
+            throw '错误:版本不对应!';
         }
-        this.currentNormalBox = (_a = r.currentNormalBox) !== null && _a !== void 0 ? _a : this.currentNormalBox;
-        this.currentExtraBox = (_b = r.currentExtraBox) !== null && _b !== void 0 ? _b : this.currentExtraBox;
-        this.$105史诗等级 = (_c = r.$105史诗等级) !== null && _c !== void 0 ? _c : this.$105史诗等级;
-        this.攻击强化百分比 = (_d = r.攻击强化百分比) !== null && _d !== void 0 ? _d : this.攻击强化百分比;
-        this.character = (_e = r.character) !== null && _e !== void 0 ? _e : this.character;
-        for (const key of Object.keys(r.database)) {
-            this.database[key] = new onceMap(r.database[key]);
-        }
-        for (const key of Object.keys(r.databaseEx)) {
-            this.databaseEx[key] = new onceMap(r.databaseEx[key]);
+        for (const key of this.jsonKeys) {
+            this[key] = (_a = r[key]) !== null && _a !== void 0 ? _a : this[key];
         }
     }
 }
@@ -378,9 +379,11 @@ var ui_components;
                 ...[...data.queryNormalEquipMap(slot).values()].map(eq => h('option').setValue(eq.name).addText(`[${slot}]${eq.name}`).setAttributes({
                     title: `${eq.tag.map(x => '#' + x).join(' ')}`
                 }).setStyle({
-                    color: (hl && ((eq.tag.findIndex(x => x.toLowerCase().includes(hl)) !== -1)
+                    color: (hl && (eq.name.includes(hl)
                         ||
-                            (eq.attrs.findIndex(x => x.type.toLowerCase().includes(hl)) !== -1))) ? 'orange' : ''
+                            eq.tag.some(x => x.toLowerCase().includes(hl))
+                        ||
+                            eq.attrs.some(x => x.type.toLowerCase().includes(hl)))) ? 'orange' : ''
                 }))
             ])
                 .on('change', ({ model, srcTarget }) => {
@@ -400,9 +403,11 @@ var ui_components;
                 ...[...data.queryExtraEquipMap(slot).values()].map(eq => h('option').setValue(eq.name).addText(`[${slot}]${eq.name}`).setAttributes({
                     title: `${eq.tag.map(x => '#' + x).join(' ')}`
                 }).setStyle({
-                    color: (hl && ((eq.tag.findIndex(x => x.toLowerCase().includes(hl)) !== -1)
+                    color: (hl && (eq.name.includes(hl)
                         ||
-                            (eq.attrs.findIndex(x => x.type.toLowerCase().includes(hl)) !== -1))) ? 'orange' : ''
+                            eq.tag.some(x => x.toLowerCase().includes(hl))
+                        ||
+                            eq.attrs.some(x => x.type.toLowerCase().includes(hl)))) ? 'orange' : ''
                 }))
             ])
                 .on('change', ({ model, srcTarget }) => {
@@ -486,7 +491,7 @@ var ui_components;
     function ui_controls(data) {
         return h('div').addChildren([
             h('div').addChildren([
-                h('span').addText('高亮标签'),
+                h('span').addText('搜索'),
                 h('input').setValue(data.highlight).on('change', ({ model, srcTarget }) => {
                     model.highlight = srcTarget.value;
                 })
