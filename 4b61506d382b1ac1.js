@@ -1,33 +1,33 @@
-import { f, Watcher } from "../ubf/index.js";
-import { Character, eqAttrTypeWords, onceMap } from "./type.js";
-import { pure } from "./util.js";
-import { calculate } from "./cal.js";
+import { f, Watcher } from "./c3b3404bc419612e.js";
+import { Character, eqAttrTypeWords, onceMap } from "./fca69cda69b4f22.js";
+import { pure } from "./4ec836d061f4fc50.js";
+import { calculate } from "./311a82e0d5868018.js";
 //===标准装备===
-import belts from "./belts.js";
-import bracelets from "./bracelets.js";
-import coats from "./coats.js";
-import earrings from "./earrings.js";
-import magicStones from "./magicStones.js";
-import necklaces from "./necklaces.js";
-import pants from "./pants.js";
-import rings from "./rings.js";
-import shoes from "./shoes.js";
-import shoulders from "./shoulders.js";
-import supports from "./supports.js";
-import weapons from "./weapons.js";
+import belts from "./20960607b2411b34.js";
+import bracelets from "./663e79a8dac21c1.js";
+import coats from "./eebf70b6edf36fab.js";
+import earrings from "./4efb916bd93d89af.js";
+import magicStones from "./e4c380ffa643a4aa.js";
+import necklaces from "./4c80f5df14bc4dfb.js";
+import pants from "./b271ff6ffc58227.js";
+import rings from "./f1865b192d788d51.js";
+import shoes from "./df75f44477bb116e.js";
+import shoulders from "./9d909d386c5e27f0.js";
+import supports from "./2fc8fc8e8fe1f9f3.js";
+import weapons from "./fc4dac38261454e5.js";
 //===贴膜装备===
-import ex_belts from "./ex_belts.js";
-import ex_bracelets from "./ex_bracelets.js";
-import ex_coats from "./ex_coats.js";
-import ex_earrings from "./ex_earrings.js";
-import ex_magicStones from "./ex_magicStones.js";
-import ex_necklaces from "./ex_necklaces.js";
-import ex_pants from "./ex_pants.js";
-import ex_rings from "./ex_rings.js";
-import ex_shoes from "./ex_shoes.js";
-import ex_shoulders from "./ex_shoulders.js";
-import ex_supports from "./ex_supports.js";
-import ex_weapons from "./ex_weapons.js";
+import ex_belts from "./d9562725b4b656ed.js";
+import ex_bracelets from "./dae0cd7c1c4c6099.js";
+import ex_coats from "./1be1b7c25cfa048e.js";
+import ex_earrings from "./104fba4d2139c97e.js";
+import ex_magicStones from "./6d503319373083ad.js";
+import ex_necklaces from "./6af4aea1a1bbefe.js";
+import ex_pants from "./72a2690690ca594e.js";
+import ex_rings from "./2e7be1c2cb06d3be.js";
+import ex_shoes from "./670b5aa28a2c771f.js";
+import ex_shoulders from "./9cddf436e363c36e.js";
+import ex_supports from "./d01223775176b36c.js";
+import ex_weapons from "./2acb845f3d9b630e.js";
 const normalSlotNames = [
     '上衣',
     '下装',

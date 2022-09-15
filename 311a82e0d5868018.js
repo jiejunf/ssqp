@@ -1,4 +1,4 @@
-import { copy } from "./util.js";
+import { copy } from "./4ec836d061f4fc50.js";
 export function calculate(normalEquips, extraEquips, lv105, atkIncresePercent, c) {
     console.log(normalEquips, '\n', extraEquips);
     lv105 = Math.floor(lv105);

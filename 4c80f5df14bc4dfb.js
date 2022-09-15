@@ -1,4 +1,4 @@
-import { Equip, onceMap } from "./type.js";
+import { Equip, onceMap } from "./fca69cda69b4f22.js";
 let necklaces = new onceMap;
 let t;
 t = new Equip;
