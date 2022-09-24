@@ -111,8 +111,9 @@ export function calculate(normalEquips, extraEquips, lv105, c) {
     const 倍率基础 = (c.attrs.攻击强化 + 1000) / 1000 * c.attrs.技能攻击力 * (最高属强 + 233) / 222;
     const 异常比例s = ['中毒比例', '灼烧比例', '感电比例', '出血比例'];
     const 异常伤害s = ['中毒伤害', '灼烧伤害', '感电伤害', '出血伤害'];
+    const 异常伤害补正 = { '中毒比例': 1, '灼烧比例': 1.05, '感电比例': 1, '出血比例': 1.1 };
     const 倍率_直伤部分 = 倍率基础 * (1 - 异常比例s.reduce((acc, w) => acc + c.attrs[w] / 100, 0));
-    const 倍率_异常部分 = 异常比例s.reduce((acc, w, i) => acc + 倍率基础 * c.attrs[w] / 100 * c.attrs[异常伤害s[i]] / 100, 0);
+    const 倍率_异常部分 = 异常比例s.reduce((acc, w, i) => acc + 倍率基础 * c.attrs[w] / 100 * c.attrs[异常伤害s[i]] / 100 * 异常伤害补正[w], 0);
     const 倍率 = 倍率_异常部分 + 倍率_直伤部分;
     标签 = Array.from(new Set(标签));
     return {
