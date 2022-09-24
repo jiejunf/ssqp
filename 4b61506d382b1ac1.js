@@ -213,7 +213,7 @@ class Data {
     clearResult() {
         this.calResults.length = 0;
     }
-    calc(combName = this.calResults.length.toString()) {
+    calc(combName = this.combName || this.calResults.length.toString()) {
         const normalEqs = Object.entries(this.currentNormalBox).map(([slot, eqName]) => {
             return this.getNormalEquipByName(eqName, slot);
         }).filter(x => !!x);
