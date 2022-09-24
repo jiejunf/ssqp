@@ -68,6 +68,7 @@ class Data {
         this.jsonInfo = '';
         this.database = this.dbInit();
         this.databaseEx = this.exDbInit();
+        this.combName = '';
         this.character = new Character;
         this.currentNormalBox = pure();
         this.currentExtraBox = pure();
@@ -470,6 +471,7 @@ var ui_components;
                     }),
                     h('button').addText('套入信息').on('click', ({ model }) => {
                         //navigator.clipboard.writeText(dr.json).then(() => { alert('已成功复制json信息到剪贴板') }).catch(() => { alert('数据导出失败') })
+                        model.combName = dr.combName;
                         model.importJSON(dr.json);
                     }),
                     h('button').addText('删除').on('click', ({ flush }) => {
@@ -508,6 +510,9 @@ var ui_components;
     }
     function ui_controls(data) {
         return h('div').addChildren([
+            h('h3').addText(data.combName).on('click', ({ model }) => {
+                model.combName = prompt('输入搭配名', data.combName) || data.combName;
+            }),
             h('div').addChildren([
                 h('span').addText('搜索'),
                 h('input').setValue(data.highlight).on('change', ({ model, srcTarget }) => {
@@ -606,6 +611,7 @@ var ui_components;
                             if (status === 0) {
                                 if (line.startsWith('#')) {
                                     combName = line.slice(1);
+                                    model.combName = combName;
                                 }
                                 else {
                                     throw new Error('格式错误:不为#开头');
