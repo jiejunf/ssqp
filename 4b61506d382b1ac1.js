@@ -468,8 +468,9 @@ var ui_components;
                     h('button').addText('设为基准').on('click', ({ model }) => {
                         model.baseline = [dr.detail.倍率, dr.detail.倍率_冷却期望];
                     }),
-                    h('button').addText('导出json').on('click', () => {
-                        navigator.clipboard.writeText(dr.json).then(() => { alert('已成功复制json信息到剪贴板'); }).catch(() => { alert('数据导出失败'); });
+                    h('button').addText('套入信息').on('click', ({ model }) => {
+                        //navigator.clipboard.writeText(dr.json).then(() => { alert('已成功复制json信息到剪贴板') }).catch(() => { alert('数据导出失败') })
+                        model.importJSON(dr.json);
                     }),
                     h('button').addText('删除').on('click', ({ flush }) => {
                         drs.splice(i, 1);
@@ -578,12 +579,6 @@ var ui_components;
             h('div').addChildren([
                 h('button').addText('导入colg模拟器装备清单').on('click', ({ model }) => {
                     navigator.clipboard.readText().then(x => model.importColgList(x)).then(() => alert('已从剪贴板导入colg模拟器清单')).catch(e => alert(e));
-                }),
-                h('button').addText('导入json').on('click', ({ model }) => {
-                    navigator.clipboard.readText().then(x => model.importJSON(x)).then(() => alert('已根据剪贴板的json信息构造出对应数据')).catch(e => {
-                        alert('发生错误,请检查json');
-                        console.log(e);
-                    });
                 }),
                 h('button').addText('从txt导入计算结果').on('click', () => {
                     document.getElementById('fileAcc').click();

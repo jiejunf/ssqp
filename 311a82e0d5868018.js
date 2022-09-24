@@ -95,7 +95,7 @@ export function calculate(normalEquips, extraEquips, lv105, c) {
             if (typeof 备注 === 'function') {
                 备注s.push(备注(c, eqs));
             }
-            else {
+            else if (备注.length) {
                 备注s.push(备注);
             }
         }
@@ -120,7 +120,7 @@ export function calculate(normalEquips, extraEquips, lv105, c) {
         倍率_冷却期望: 倍率 / 冷却系数,
         冷却系数,
         标签,
-        备注: 备注s.join('\n'),
+        备注: 备注s.join(';'),
         角色: c
     };
 }

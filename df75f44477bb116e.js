@@ -136,7 +136,7 @@ t.name = '天才技术大师的加厚长靴';
 t.attrs.push({ type: '攻击强化', value: 2910, times: 1 });
 t.attrs.push({ type: '攻击强化', value: 362, times: 5 });
 t.attrs.push({ type: '技能攻击力', value: 18.75, times: 1 });
-t.tag = ['mp套核心', 'mp套', '默认技攻以mp防具三件套计算'];
+t.tag = ['mp套核心', 'mp套'];
 shoes.set(t.name, t);
 t = new Equip;
 t.name = '蒸汽朋克音速鞋';
