@@ -72,7 +72,7 @@ class Data {
         this.currentNormalBox = pure();
         this.currentExtraBox = pure();
         this.calResults = [];
-        this.calResultBaseline = [0, 0];
+        this.baseline = [0, 0];
         this.$105史诗等级 = 1;
         this.detailedEquip = void 0;
         this.highlight = '';
@@ -207,7 +207,7 @@ class Data {
         return this.queryExtraEquipMap(slot).get(name);
     }
     hasBaseLine() {
-        return this.calResultBaseline.some(x => x !== 0);
+        return this.baseline.some(x => x !== 0);
     }
     clearResult() {
         this.calResults.length = 0;
@@ -466,7 +466,7 @@ var ui_components;
                         userSelect: 'none'
                     }).setAttributes({ title: '点击两个搭配以比较装备的差异' }),
                     h('button').addText('设为基准').on('click', ({ model }) => {
-                        model.calResultBaseline = [dr.detail.倍率, dr.detail.倍率_冷却期望];
+                        model.baseline = [dr.detail.倍率, dr.detail.倍率_冷却期望];
                     }),
                     h('button').addText('导出json').on('click', () => {
                         navigator.clipboard.writeText(dr.json).then(() => { alert('已成功复制json信息到剪贴板'); }).catch(() => { alert('数据导出失败'); });
@@ -476,8 +476,8 @@ var ui_components;
                         flush();
                     }),
                     h('div').addChildren([
-                        h('h4').addText(strTag `倍率=${dr.detail.倍率.toFixed(2)}`).setStyle({ color: 'red' }),
-                        h('h4').addText(strTag `倍率/冷却系数=${dr.detail.倍率_冷却期望.toFixed(2)}`).setStyle({ color: 'green' }),
+                        h('h4').addText(strTag `倍率=${data.hasBaseLine() ? (dr.detail.倍率 * 100 / data.baseline[0]).toFixed(2) + '%' : dr.detail.倍率.toFixed(2)}`).setStyle({ color: 'red' }),
+                        h('h4').addText(strTag `倍率/冷却系数=${data.hasBaseLine() ? (dr.detail.倍率_冷却期望 * 100 / data.baseline[1]).toFixed(2) + '%' : dr.detail.倍率_冷却期望.toFixed(2)}`).setStyle({ color: 'green' }),
                         h('h4').addText(strTag `冷却系数=${dr.detail.冷却系数.toFixed(2)}`).setStyle({ color: 'blue' }),
                         h('h4').addText(strTag `标签=${dr.detail.标签.join(' ')}`),
                         h('h4').addText(strTag `备注=${dr.detail.备注}`),
@@ -572,7 +572,7 @@ var ui_components;
                     model.clearResult();
                 }),
                 h('button').addText('清空基准').on('click', ({ model }) => {
-                    model.calResultBaseline = [0, 0];
+                    model.baseline = [0, 0];
                 })
             ]),
             h('div').addChildren([
