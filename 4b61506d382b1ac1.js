@@ -482,7 +482,6 @@ var ui_components;
                         h('h4').addText(strTag `倍率=${data.hasBaseLine() ? (dr.detail.倍率 * 100 / data.baseline[0]).toFixed(2) + '%' : dr.detail.倍率.toFixed(2)}`).setStyle({ color: 'red' }),
                         h('h4').addText(strTag `倍率/冷却系数=${data.hasBaseLine() ? (dr.detail.倍率_冷却期望 * 100 / data.baseline[1]).toFixed(2) + '%' : dr.detail.倍率_冷却期望.toFixed(2)}`).setStyle({ color: 'green' }),
                         h('h4').addText(strTag `冷却系数=${dr.detail.冷却系数.toFixed(2)}`).setStyle({ color: 'blue' }),
-                        h('h4').addText(strTag `标签=${dr.detail.标签.join(' ')}`),
                         h('h4').addText(strTag `备注=${dr.detail.备注}`),
                         h('h4').addText('详细信息').on('click', () => {
                             const strs = [
@@ -493,6 +492,7 @@ var ui_components;
                             for (const [k, v] of Object.entries(dr.detail.角色.attrs)) {
                                 strs.push(strTag `<p>${k}=${v.toFixed(2)}</p>`);
                             }
+                            strs.push(dr.detail.标签.map(x => '#' + x).join(' '));
                             strs.push('</body>');
                             const u = URL.createObjectURL(new Blob(strs, { type: 'text/html' }));
                             window.open(u, '__blank');
@@ -500,7 +500,7 @@ var ui_components;
                         }).setStyle({ textDecoration: 'underline', cursor: 'pointer' })
                     ]).setStyle({
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(6,1fr)',
+                        gridTemplateColumns: 'repeat(5,1fr)',
                         gap: '2rem'
                     }).addClass('rUnit')
                 ]).setStyle({ borderBottom: '1px solid black' });
