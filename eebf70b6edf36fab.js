@@ -66,7 +66,7 @@ t = new Equip;
 t.name = '守护之王者铠甲';
 t.attrs.push({ type: '攻击强化', value: 4647, times: 1 });
 t.attrs.push({ type: '攻击强化', value: 445, times: 5 });
-t.tag = ['护盾', '召唤', '恢复hp'];
+t.tag = ['盾墙', '召唤', '恢复hp'];
 coats.set(t.name, t);
 t = new Equip;
 t.name = '屠龙者';

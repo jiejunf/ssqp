@@ -158,7 +158,7 @@ t.name = '暴龙王的支配:恐怖';
 t.attrs.push({ type: '攻击强化', value: 7396, times: 1 });
 t.属强(15, 1);
 t.移攻施速模板0(20, 1);
-t.tag = ['贴膜'];
+t.tag = ['保护罩', '保护罩强化'];
 necklaces.set(t.name, t);
 for (const v of necklaces.values()) {
     v.slot = '项链';

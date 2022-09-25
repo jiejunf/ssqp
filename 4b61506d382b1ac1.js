@@ -28,6 +28,7 @@ import ex_shoes from "./670b5aa28a2c771f.js";
 import ex_shoulders from "./9cddf436e363c36e.js";
 import ex_supports from "./d01223775176b36c.js";
 import ex_weapons from "./2acb845f3d9b630e.js";
+window.onbeforeunload = e => e.returnValue = '111';
 const normalSlotNames = [
     '上衣',
     '下装',
