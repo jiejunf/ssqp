@@ -159,6 +159,14 @@ t.attrs.push({ type: '攻击强化', value: 1778, times: 1 });
 t.attrs.push({ type: '攻击强化', value: 741, times: 4 });
 t.tag = ['骰子点数'];
 shoulders.set(t.name, t);
+t = new Equip;
+t.name = '掩饰痛苦的威严';
+t.attrs.push({ type: '攻击强化', value: 4528, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 185, times: 12 });
+t.attrs.push({ type: '技能攻击力', value: 1, times: 8 });
+t.属强(10, 1);
+t.tag = ['属抗肩'];
+shoulders.set(t.name, t);
 for (const v of shoulders.values()) {
     v.slot = '护肩';
     if (!v.isMyth) {

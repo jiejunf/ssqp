@@ -149,6 +149,14 @@ t.attrs.push({ type: '攻击强化', value: 4258, times: 1 });
 t.attrs.push({ type: '攻击强化', value: 4446, times: 1 });
 t.tag = ['mp条件'];
 supports.set(t.name, t);
+t = new Equip;
+t.name = '生命酒杯';
+t.attrs.push({ type: '攻击强化', value: 5874, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 2964, times: 1 });
+t.attrs.push({ type: '移动速度', value: 8, times: 1 });
+t.属强(10, 1);
+t.tag = ['mp条件'];
+supports.set(t.name, t);
 for (const v of supports.values()) {
     v.slot = '左槽';
     if (!v.isMyth) {

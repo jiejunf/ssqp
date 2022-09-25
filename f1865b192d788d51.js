@@ -166,6 +166,14 @@ t.attrs.push({ type: '攻击强化', value: 445, times: 1 });
 t.攻施速模板0(8, 1);
 t.tag = ['异常状态对象数量'];
 rings.set(t.name, t);
+t = new Equip;
+t.name = '暴龙王的支配:压制';
+t.attrs.push({ type: '攻击强化', value: 5604, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 790, times: 3 });
+t.attrs.push({ type: '技能攻击力', value: 5, times: 1 });
+t.属强(5, 0);
+t.attrs.push({ type: '攻击强化', value: 741, times: 1 });
+rings.set(t.name, t);
 for (const v of rings.values()) {
     v.slot = '戒指';
     if (!v.isMyth) {

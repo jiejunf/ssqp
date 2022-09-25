@@ -147,6 +147,12 @@ t.attrs.push({ type: '攻击强化', value: 296, times: 10 });
 t.attrs.push({ type: '移动速度', value: 8, times: 1 });
 t.tag = ['削韧'];
 pants.set(t.name, t);
+t = new Equip;
+t.name = '战胜噩梦的凯旋';
+t.attrs.push({ type: '攻击强化', value: 5336, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 2223, times: 1 });
+t.属强(20, 1);
+pants.set(t.name, t);
 for (const v of pants.values()) {
     v.slot = '下装';
     if (!v.isMyth) {

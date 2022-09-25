@@ -43,18 +43,18 @@ const normalSlotNames = [
     '武器'
 ];
 const extraSlotNames = [
-    /*'ex上衣',
+    'ex上衣',
     'ex下装',
     'ex护肩',
     'ex腰带',
-    'ex鞋子',*/
+    'ex鞋子',
     'ex手镯',
     'ex戒指',
     'ex项链',
-    /*'ex左槽',
+    'ex左槽',
     'ex右槽',
     'ex耳环',
-    'ex武器'*/
+    'ex武器'
 ];
 function has(item, key) {
     return key in item;
@@ -281,18 +281,18 @@ var ui_components;
 (function (ui_components) {
     function ui_app(data) {
         return h('div').addChildren([
-            ui_selections(data).setStyle({ gridArea: 'a', borderRight: '1px solid black' }),
-            ui_equip_detail(data).setStyle({ gridArea: 'b', borderRight: '1px solid black' }),
+            ui_selections(data).setStyle({ gridArea: 'a', borderRight: '1px solid black', overflow: 'scroll' }),
+            ui_equip_detail(data).setStyle({ gridArea: 'b', borderRight: '1px solid black', overflow: 'scroll' }),
             ui_results(data).setStyle({ gridArea: 'd', borderTop: '1px solid black', overflow: 'scroll' }),
-            ui_controls(data).setStyle({ gridArea: 'c', padding: '3px 0' }),
+            ui_controls(data).setStyle({ gridArea: 'c', padding: '3px 0', overflow: 'scroll' }),
         ]).setStyle({
             display: 'grid',
             gridTemplateAreas: `
 			'a b c'
 			'd d d'
 		`,
-            gridTemplateColumns: '2fr 2fr 3fr',
-            gridTemplateRows: '1fr 2fr',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            gridTemplateRows: '1fr 1fr',
             height: '100%',
             width: '100%'
         });
@@ -549,7 +549,7 @@ var ui_components;
                             model.character.attrs[w] = nval;
                         }
                     }
-                }).setAttributes({ title: '点击以修改所有属强值' }).setStyle({ cursor: 'pointer' }),
+                }).setAttributes({ title: '点击以修改所有属强值' }).setStyle({ cursor: 'pointer', display: 'block', fontSize: '1.5rem' }),
                 ...['火强', '冰强', '光强', '暗强'].map(w => h('span').addChildren([
                     h('span').addText(w),
                     h('input').setAttributes({ type: 'number' })
@@ -690,7 +690,7 @@ var ui_components;
                         model.calResults.splice(0, oldResSize);
                     }),
                 ]).setAttributes({ class: 'zde' })
-            ]).setStyle({ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)' }),
+            ]),
         ]);
     }
 })(ui_components || (ui_components = {}));

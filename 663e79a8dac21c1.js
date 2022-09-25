@@ -163,6 +163,12 @@ t.attrs.push({ type: '攻击强化', value: 4972, times: 1 });
 t.attrs.push({ type: '技能攻击力', value: 4, times: 7 });
 t.tag = ['睡眠核心'];
 bracelets.set(t.name, t);
+t = new Equip;
+t.name = '暴龙王的支配:武力';
+t.attrs.push({ type: '攻击强化', value: 5066, times: 1 });
+t.attrs.push({ type: '技能攻击力', value: 10, times: 1 });
+t.属强(30, 1);
+bracelets.set(t.name, t);
 for (const v of bracelets.values()) {
     v.slot = '手镯';
     if (!v.isMyth) {

@@ -157,6 +157,12 @@ t.attrs.push({ type: '攻击强化', value: 445, times: 10 });
 t.attrs.push({ type: '移动速度', value: 8, times: 1 });
 t.tag = ['低血'];
 magicStone.set(t.name, t);
+t = new Equip;
+t.name = '炎息龙玉';
+t.attrs.push({ type: '攻击强化', value: 5066, times: 1 });
+t.attrs.push({ type: '技能攻击力', value: 9, times: 1 });
+t.tag = ['手搓'];
+magicStone.set(t.name, t);
 for (const v of magicStone.values()) {
     v.slot = '右槽';
     if (!v.isMyth) {

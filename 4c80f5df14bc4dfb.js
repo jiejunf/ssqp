@@ -153,6 +153,13 @@ t.attrs.push({ type: '攻击强化', value: 356, times: 10 });
 t.属强(10, 1);
 t.tag = ['特效加强'];
 necklaces.set(t.name, t);
+t = new Equip;
+t.name = '暴龙王的支配:恐怖';
+t.attrs.push({ type: '攻击强化', value: 7396, times: 1 });
+t.属强(15, 1);
+t.移攻施速模板0(20, 1);
+t.tag = ['贴膜'];
+necklaces.set(t.name, t);
 for (const v of necklaces.values()) {
     v.slot = '项链';
     if (!v.isMyth) {

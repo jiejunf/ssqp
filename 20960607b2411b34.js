@@ -157,6 +157,15 @@ t.name = '永远沉眠的准备';
 t.attrs.push({ type: '攻击强化', value: 4528, times: 1 });
 t.attrs.push({ type: '灼烧伤害', value: 15, times: 1 });
 t.attrs.push({ type: '攻击强化', value: 356, times: 1 });
+t.tag = ['灼烧结算'];
+belts.set(t.name, t);
+t = new Equip;
+t.name = '共度患难的承诺';
+t.attrs.push({ type: '攻击强化', value: 6952, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 148, times: 40 });
+t.attrs.push({ type: '技能攻击力', value: 6, times: 1 });
+t.属强(6, 1);
+t.所有速度(6, 1);
 belts.set(t.name, t);
 for (const v of belts.values()) {
     v.slot = '腰带';

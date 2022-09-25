@@ -22,13 +22,25 @@ select {
     width: 12rem;
 }
 
-.zde>button {
-    margin-left: 2rem;
-    display: block;
-}
 
 .zde {
     cursor: pointer;
     margin-right: 1rem;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+}
+
+div::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+div::-webkit-scrollbar-track {
+    display: none;
+}
+
+div::-webkit-scrollbar-thumb {
+    background-color: gray;
+}
+
+div::-webkit-scrollbar-corner {
+    display: none;
 }

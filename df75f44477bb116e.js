@@ -169,6 +169,14 @@ t.attrs.push({ type: '技能攻击力', value: 13, times: 1 });
 t.属强(15, 1);
 t.tag = ['异常鞋'];
 shoes.set(t.name, t);
+t = new Equip;
+t.name = '抛下过去的前进';
+t.attrs.push({ type: '攻击强化', value: 6318, times: 1 });
+t.attrs.push({ type: '攻击强化', value: 3705, times: 1 });
+t.attrs.push({ type: '技能攻击力', value: 13, times: 1 });
+t.攻施速模板0(8, 1);
+t.tag = ['石化鞋'];
+shoes.set(t.name, t);
 for (const v of shoes.values()) {
     v.attrs.push({ type: '移动速度', value: 4, times: 1 });
     v.slot = '鞋子';
