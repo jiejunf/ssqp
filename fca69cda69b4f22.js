@@ -40,6 +40,9 @@ export class Character {
         this.other = {
             装备以外_攻速鞋适用攻速: 32
         };
+        this.异常伤害系数 = {
+            感电伤害: 1, 灼烧伤害: 1.05, 出血伤害: 1.1, 中毒伤害: 1
+        };
         this.attrs = {
             //属强
             火强: 308,

@@ -28,7 +28,7 @@ import ex_shoes from "./670b5aa28a2c771f.js";
 import ex_shoulders from "./9cddf436e363c36e.js";
 import ex_supports from "./d01223775176b36c.js";
 import ex_weapons from "./2acb845f3d9b630e.js";
-window.onbeforeunload = e => e.returnValue = '111';
+window.onbeforeunload = e => e.returnValue = '1';
 const normalSlotNames = [
     '上衣',
     '下装',
@@ -65,7 +65,7 @@ function keys(item) {
 }
 class Data {
     constructor() {
-        this.VERSION = '20220924';
+        this.VERSION = '20221006';
         this.jsonInfo = '';
         this.database = this.dbInit();
         this.databaseEx = this.exDbInit();
@@ -222,7 +222,7 @@ class Data {
             return this.getExtraEquipByName(eqName, slot);
         }).filter(x => !!x);
         this.calResults.push({
-            combination: [...normalEqs, ...extraEqs].map(x => `[${x.slot}]${x.name}`),
+            combination: [...normalEqs.map(x => `[${x.slot}]${x.name}`), ...extraEqs.map(x => `[${x.slot}贴膜]${x.name}`)],
             detail: calculate(normalEqs, extraEqs, this.$105史诗等级, this.character),
             json: this.exportJSON(),
             combName: combName
@@ -690,7 +690,20 @@ var ui_components;
                         });
                         model.calResults.splice(0, oldResSize);
                     }),
-                ]).setAttributes({ class: 'zde' })
+                ]).setAttributes({ class: 'zde' }),
+                h('details').addChildren([
+                    h('summary').addText('异常伤害系数'),
+                    ...Object.keys(data.character.异常伤害系数).map(key => {
+                        return h('div').addChildren([
+                            h('span').addText(key),
+                            h('input').on('change', ({ model, srcTarget }) => {
+                                if (!isNaN(+srcTarget.value)) {
+                                    model.character.异常伤害系数[key] = +srcTarget.value;
+                                }
+                            }).setValue(data.character.异常伤害系数[key])
+                        ]);
+                    })
+                ]).setAttributes({ class: 'zde' }),
             ]),
         ]);
     }

@@ -86,7 +86,7 @@ t = new Equip;
 t.name = '摇曳的残影短靴';
 t.attrs.push({ type: '攻击强化', value: 3988 + (1616 - 808) * 2, times: 1 });
 t.属强(+20, 1);
-t.attrs.push({ type: '冷却恢复速度', value: +15, times: 1 });
+t.attrs.push({ type: '冷却时间', value: -5, times: 3 });
 t.tag = ['感电', 'CD'];
 shoes.set(t.name, t);
 t = new Equip;
@@ -160,7 +160,17 @@ t.name = '赛博音速长靴';
 t.attrs.push({ type: '攻击强化', value: 2642, times: 1 });
 t.attrs.push({ type: '技能攻击力', value: 30, times: 1 });
 t.tag = ['攻击速度', '攻速鞋'];
-t.备注 = c => `攻速鞋适用攻速:${c.other.装备以外_攻速鞋适用攻速 + c.attrs.攻击速度}`;
+t.备注 = (c, eqs) => {
+    const t = eqs.find(x => x.slot === '武器');
+    if (t) {
+        const s = t.attrs.find(x => x.type === '攻击速度');
+        if (s) {
+            const v = s.times * s.value;
+            return `攻速鞋适用攻速:${c.other.装备以外_攻速鞋适用攻速 + c.attrs.攻击速度 - v}`;
+        }
+    }
+    return `攻速鞋适用攻速:${c.other.装备以外_攻速鞋适用攻速 + c.attrs.攻击速度}`;
+};
 shoes.set(t.name, t);
 t = new Equip;
 t.name = '朝向消亡的脚步';
