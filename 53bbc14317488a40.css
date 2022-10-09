@@ -9,7 +9,9 @@ input[type=number] {
 input {
     width: 6rem;
 }
-
+input[type=checkbox] {
+    width: 1rem;
+}
 html {
     font-size: 13px;
 }
@@ -22,6 +24,9 @@ select {
     width: 12rem;
 }
 
+label{
+    user-select: none;
+}
 
 .zde {
     cursor: pointer;

@@ -1,5 +1,5 @@
 import { f, Watcher } from "./c3b3404bc419612e.js";
-import { Character, eqAttrTypeWords, onceMap } from "./fca69cda69b4f22.js";
+import { Character, eqAttrTypeWords, Equip, onceMap } from "./fca69cda69b4f22.js";
 import { pure, strTag } from "./4ec836d061f4fc50.js";
 import { calculate } from "./311a82e0d5868018.js";
 //===标准装备===
@@ -88,6 +88,12 @@ class Data {
             'character',
             'VERSION',
         ];
+        this.replaceDBKeys = new Set([
+            'database',
+            'databaseEx',
+        ]);
+        this.replaceNormalSlots = new Set;
+        this.replaceExtraSlots = new Set;
         this.diffRing = new class {
             constructor() {
                 this.index = 0;
@@ -225,7 +231,8 @@ class Data {
             combination: [...normalEqs.map(x => `[${x.slot}]${x.name}`), ...extraEqs.map(x => `[${x.slot}贴膜]${x.name}`)],
             detail: calculate(normalEqs, extraEqs, this.$105史诗等级, this.character),
             json: this.exportJSON(),
-            combName: combName
+            combName: combName,
+            rpselect: false
         });
     }
     exportJSON() {
@@ -236,6 +243,9 @@ class Data {
         const v = JSON.stringify(r, (_, value) => {
             if (value instanceof onceMap) {
                 return { __prototype: 'onceMap', content: [...value] };
+            }
+            else if (value instanceof Equip) {
+                return { __prototype: 'Equip', content: { ...value } };
             }
             else if (typeof value === 'function') {
                 return { __prototype: 'function', content: value.toString() };
@@ -251,6 +261,13 @@ class Data {
         const r = JSON.parse(s, (_, value) => {
             if (value && value.__prototype === 'onceMap') {
                 return new onceMap(value.content);
+            }
+            else if (value && value.__prototype === 'Equip') {
+                const t = new Equip;
+                for (const key in value.content) {
+                    Reflect.set(t, key, value.content[key]);
+                }
+                return t;
             }
             else if (value && value.__prototype === 'function') {
                 return (new Function(`return ${value.content}`))();
@@ -285,7 +302,7 @@ var ui_components;
             ui_selections(data).setStyle({ gridArea: 'a', borderRight: '1px solid black', overflow: 'scroll' }),
             ui_equip_detail(data).setStyle({ gridArea: 'b', borderRight: '1px solid black', overflow: 'scroll' }),
             ui_results(data).setStyle({ gridArea: 'd', borderTop: '1px solid black', overflow: 'scroll' }),
-            ui_controls(data).setStyle({ gridArea: 'c', padding: '3px 0', overflow: 'scroll' }),
+            control_comp.ui_controls(data).setStyle({ gridArea: 'c', padding: '3px 0', overflow: 'scroll' }),
         ]).setStyle({
             display: 'grid',
             gridTemplateAreas: `
@@ -403,7 +420,23 @@ var ui_components;
                 model.detailedEquip = model.getNormalEquipByName(srcTarget.value, slot);
             }).setValue((_b = (_a = data.getNormalEquipByName(data.currentNormalBox[slot], slot)) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '<无>').on('click', ({ model }) => {
                 model.detailedEquip = model.getNormalEquipByName(model.currentNormalBox[slot], slot);
-            })
+            }),
+            h('label').addChildren([
+                h('input')
+                    .setAttributes({ type: 'checkbox', class: 'bxr' })
+                    .setProperties({ checked: data.replaceNormalSlots.has(slot) })
+                    .on('change', ({ model, srcTarget }) => {
+                    if (srcTarget.checked) {
+                        model.replaceNormalSlots.add(slot);
+                    }
+                    else {
+                        model.replaceNormalSlots.delete(slot);
+                    }
+                }),
+                '选定'
+            ])
+                .setStyle({ userSelect: 'none' })
+                .setAttributes({ title: '使用替换功能,将用选定的装备去替换选定的计算结果中的相同部位的装备,并重新计算' })
         ]).setStyle({ marginBottom: '5px' });
     }
     function ui_selections_extra_piece(data, slot) {
@@ -427,7 +460,24 @@ var ui_components;
                 model.detailedEquip = model.getExtraEquipByName(srcTarget.value, slot);
             }).setValue((_b = (_a = data.getExtraEquipByName(data.currentExtraBox[slot], slot)) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '<无>').on('click', ({ model }) => {
                 model.detailedEquip = model.getExtraEquipByName(model.currentExtraBox[slot], slot);
-            })
+            }),
+            h('label').addChildren([
+                h('input')
+                    .setAttributes({ type: 'checkbox', class: 'bxr' })
+                    .setProperties({ checked: data.replaceExtraSlots.has(slot) })
+                    .on('change', ({ model, srcTarget }) => {
+                    console.log(model);
+                    if (srcTarget.checked) {
+                        model.replaceExtraSlots.add(slot);
+                    }
+                    else {
+                        model.replaceExtraSlots.delete(slot);
+                    }
+                }),
+                '选定'
+            ])
+                .setStyle({ userSelect: 'none' })
+                .setAttributes({ title: '使用替换功能,将用选定的装备去替换选定的计算结果中的相同部位的装备,并重新计算' })
         ]).setStyle({ marginBottom: '5px' });
     }
     function ui_results(data) {
@@ -479,6 +529,15 @@ var ui_components;
                         drs.splice(i, 1);
                         flush();
                     }),
+                    h('label').addChildren([
+                        h('input').setAttributes({ type: 'checkbox' }).setProperties({ checked: dr.rpselect }).on('change', ({ flush, srcTarget }) => {
+                            dr.rpselect = srcTarget.checked;
+                            flush();
+                        }),
+                        '选定'
+                    ])
+                        .setStyle({ userSelect: 'none' })
+                        .setAttributes({ title: '使用替换功能,将用选定的装备,去替换选定的计算结果中的相同部位的装备,并重新计算' }),
                     h('div').addChildren([
                         h('h4').addText(strTag `倍率=${data.hasBaseLine() ? (dr.detail.倍率 * 100 / data.baseline[0]).toFixed(2) + '%' : dr.detail.倍率.toFixed(2)}`).setStyle({ color: 'red' }),
                         h('h4').addText(strTag `倍率/冷却系数=${data.hasBaseLine() ? (dr.detail.倍率_冷却期望 * 100 / data.baseline[1]).toFixed(2) + '%' : dr.detail.倍率_冷却期望.toFixed(2)}`).setStyle({ color: 'green' }),
@@ -509,203 +568,377 @@ var ui_components;
         }
         return h('div');
     }
-    function ui_controls(data) {
-        return h('div').addChildren([
-            h('h3').addText(data.combName).on('click', ({ model }) => {
+    let control_comp;
+    (function (control_comp) {
+        function ui_combname(data) {
+            return h('h3').addText(data.combName).on('click', ({ model }) => {
                 model.combName = prompt('输入搭配名', data.combName) || data.combName;
-            }),
-            h('div').addChildren([
+            });
+        }
+        function ui_search(data) {
+            return h('div').addChildren([
                 h('span').addText('搜索'),
                 h('input').setValue(data.highlight).on('change', ({ model, srcTarget }) => {
                     model.highlight = srcTarget.value;
                 })
-            ]),
-            h('div').addChildren([
-                h('span').addText('105史诗等级(均)'),
-                h('input').setAttributes({ type: 'number' }).setValue(data.$105史诗等级).on('change', ({ model, srcTarget }) => {
-                    model.$105史诗等级 = srcTarget.valueAsNumber;
-                })
-            ]),
-            h('div').addChildren([
-                h('span').addText('攻击强化百分比提升'),
-                h('input').setAttributes({ type: 'number' }).setValue(data.character.attrs.攻击强化百分比提升).on('change', ({ model, srcTarget }) => {
-                    model.character.attrs.攻击强化百分比提升 = srcTarget.valueAsNumber;
-                })
-            ]),
-            h('div').addChildren([
-                h('span').addText('固有冷却时间'),
-                h('input').setAttributes({ type: 'number' }).setValue(data.character.attrs.冷却时间).on('change', ({ model, srcTarget }) => {
-                    model.character.attrs.冷却时间 = srcTarget.valueAsNumber;
-                })
-            ]),
-            h('div').addChildren([
-                h('strong').addText('固有属强').on('click', ({ model }) => {
-                    const val = prompt('一键修改所有属强值');
-                    if (val === null) {
-                        return;
-                    }
-                    const nval = +val;
-                    if (nval >= 0) {
-                        for (const w of ['火强', '冰强', '光强', '暗强']) {
-                            model.character.attrs[w] = nval;
-                        }
-                    }
-                }).setAttributes({ title: '点击以修改所有属强值' }).setStyle({ cursor: 'pointer', display: 'block', fontSize: '1.5rem' }),
-                ...['火强', '冰强', '光强', '暗强'].map(w => h('span').addChildren([
-                    h('span').addText(w),
-                    h('input').setAttributes({ type: 'number' })
-                        .setValue(data.character.attrs[w])
-                        .on('change', ({ model, srcTarget }) => {
-                        model.character.attrs[w] = srcTarget.valueAsNumber;
+            ]);
+        }
+        function ui_attr0(data) {
+            return h('div').addChildren([
+                h('div').addChildren([
+                    h('span').addText('105史诗等级(均)'),
+                    h('input').setAttributes({ type: 'number' }).setValue(data.$105史诗等级).on('change', ({ model, srcTarget }) => {
+                        model.$105史诗等级 = srcTarget.valueAsNumber;
                     })
-                ]))
-            ]),
-            h('div').addChildren([
-                h('strong').addText('攻速鞋计入的装备外攻速'),
-                h('input').setAttributes({ type: 'number' })
-                    .setValue(data.character.other.装备以外_攻速鞋适用攻速)
-                    .on('change', ({ model, srcTarget }) => {
-                    model.character.other.装备以外_攻速鞋适用攻速 = srcTarget.valueAsNumber;
-                })
-            ]),
-            h('div').addChildren([
-                h('button').addText('计算').on('click', ({ model }) => {
-                    model.calc();
-                }),
-                h('button').addText('清空结果').on('click', ({ model }) => {
-                    if (!confirm('将清空全部结果，要继续吗?')) {
-                        return;
-                    }
-                    model.clearResult();
-                }),
-                h('button').addText('清空基准').on('click', ({ model }) => {
-                    model.baseline = [0, 0];
-                })
-            ]),
-            h('div').addChildren([
-                h('button').addText('导入colg模拟器装备清单').on('click', ({ model }) => {
-                    navigator.clipboard.readText().then(x => model.importColgList(x)).then(() => alert('已从剪贴板导入colg模拟器清单')).catch(e => alert(e));
-                }),
-                h('button').addText('从txt导入计算结果').on('click', () => {
-                    document.getElementById('fileAcc').click();
-                }),
-                h('input').setAttributes({
-                    type: 'file',
-                    id: 'fileAcc',
-                    accept: 'text/plain'
-                }).on('change', ({ model, srcTarget }) => {
-                    var _a;
-                    const file = (_a = srcTarget.files) === null || _a === void 0 ? void 0 : _a[0];
-                    if (!file) {
-                        return;
-                    }
-                    const fr = new FileReader;
-                    fr.onload = () => {
-                        const content = fr.result;
-                        let status = 0;
-                        let combName = '';
-                        for (let line of content.split('\n')) {
-                            line = line.trim();
-                            if (!line) {
-                                continue;
-                            }
-                            if (status === 0) {
-                                if (line.startsWith('#')) {
-                                    combName = line.slice(1);
-                                    model.combName = combName;
-                                }
-                                else {
-                                    throw new Error('格式错误:不为#开头');
-                                }
-                                status = 1;
-                            }
-                            else {
-                                model.importJSON(line);
-                                model.calc(combName);
-                                status = 0;
-                            }
-                        }
-                        fr.onload = null;
-                        srcTarget.value = '';
-                    };
-                    fr.readAsText(file);
-                }).setStyle({ display: 'none' }),
-                h('button').addText('下载所有计算结果').on('click', ({ model }) => {
-                    const texts = [];
-                    const names = [];
-                    for (const result of model.calResults) {
-                        names.push(result.combName);
-                        texts.push('#' + result.combName, result.json);
-                    }
-                    const text_str = texts.join('\n');
-                    const url = URL.createObjectURL(new Blob([
-                        text_str
-                    ], {
-                        type: 'text/plain'
-                    }));
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = '搭配#' + names.join('_') + '.txt';
-                    a.click();
-                }),
-            ]),
-            h('div').addChildren([
-                h('details').addChildren([
-                    h('summary').addText('排序'),
-                    h('button').addText('按倍率').on('click', ({ model }) => {
-                        model.calResults.sort((a, b) => b.detail.倍率 - a.detail.倍率);
-                    }),
-                    h('button').addText('按倍率/冷却系数').on('click', ({ model }) => {
-                        model.calResults.sort((a, b) => b.detail.倍率_冷却期望 - a.detail.倍率_冷却期望);
-                    }),
-                    h('button').addText('按冷却系数').on('click', ({ model }) => {
-                        model.calResults.sort((a, b) => b.detail.冷却系数 - a.detail.冷却系数);
-                    }),
-                    h('button').addText('按移动速度').on('click', ({ model }) => {
-                        model.calResults.sort((a, b) => b.detail.角色.attrs.移动速度 - a.detail.角色.attrs.移动速度);
-                    }),
-                    h('button').addText('按攻击速度').on('click', ({ model }) => {
-                        model.calResults.sort((a, b) => b.detail.角色.attrs.攻击速度 - a.detail.角色.attrs.攻击速度);
-                    }),
-                    h('button').addText('按施放速度').on('click', ({ model }) => {
-                        model.calResults.sort((a, b) => b.detail.角色.attrs.施放速度 - a.detail.角色.attrs.施放速度);
-                    }),
-                ]).setAttributes({ class: 'zde' }),
-                h('details').addChildren([
-                    h('summary').addText('重置'),
-                    h('button').addText('重置当前装备数据').on('click', ({ model }) => {
-                        if (confirm('确定要重置当前装备数据吗')) {
-                            model.database = model.dbInit();
-                        }
-                    }),
-                    h('button').addText('重置所有结果中的装备数据').on('click', ({ model }) => {
-                        if (!confirm('确定要重置所有结果中的装备数据吗')) {
+                ]),
+                h('div').addChildren([
+                    h('span').addText('攻击强化百分比提升'),
+                    h('input').setAttributes({ type: 'number' }).setValue(data.character.attrs.攻击强化百分比提升).on('change', ({ model, srcTarget }) => {
+                        model.character.attrs.攻击强化百分比提升 = srcTarget.valueAsNumber;
+                    })
+                ]),
+                h('div').addChildren([
+                    h('span').addText('固有冷却时间'),
+                    h('input').setAttributes({ type: 'number' }).setValue(data.character.attrs.冷却时间).on('change', ({ model, srcTarget }) => {
+                        model.character.attrs.冷却时间 = srcTarget.valueAsNumber;
+                    })
+                ]),
+                h('div').addChildren([
+                    h('strong').addText('固有属强').on('click', ({ model }) => {
+                        const val = prompt('一键修改所有属强值');
+                        if (val === null) {
                             return;
                         }
-                        const oldResSize = model.calResults.length;
-                        model.calResults.forEach(r => {
-                            model.importJSON(r.json);
-                            model.database = model.dbInit();
-                            model.calc(r.combName);
-                        });
-                        model.calResults.splice(0, oldResSize);
-                    }),
-                ]).setAttributes({ class: 'zde' }),
-                h('details').addChildren([
-                    h('summary').addText('异常伤害系数'),
-                    ...Object.keys(data.character.异常伤害系数).map(key => {
-                        return h('div').addChildren([
-                            h('span').addText(key),
-                            h('input').on('change', ({ model, srcTarget }) => {
-                                if (!isNaN(+srcTarget.value)) {
-                                    model.character.异常伤害系数[key] = +srcTarget.value;
-                                }
-                            }).setValue(data.character.异常伤害系数[key])
-                        ]);
+                        const nval = +val;
+                        if (nval >= 0) {
+                            for (const w of ['火强', '冰强', '光强', '暗强']) {
+                                model.character.attrs[w] = nval;
+                            }
+                        }
+                    }).setAttributes({ title: '点击以修改所有属强值' }).setStyle({ cursor: 'pointer', display: 'block', fontSize: '1.5rem' }),
+                    ...['火强', '冰强', '光强', '暗强'].map(w => h('span').addChildren([
+                        h('span').addText(w),
+                        h('input').setAttributes({ type: 'number' })
+                            .setValue(data.character.attrs[w])
+                            .on('change', ({ model, srcTarget }) => {
+                            model.character.attrs[w] = srcTarget.valueAsNumber;
+                        })
+                    ]))
+                ]),
+                h('div').addChildren([
+                    h('strong').addText('攻速鞋计入的装备外攻速'),
+                    h('input').setAttributes({ type: 'number' })
+                        .setValue(data.character.other.装备以外_攻速鞋适用攻速)
+                        .on('change', ({ model, srcTarget }) => {
+                        model.character.other.装备以外_攻速鞋适用攻速 = srcTarget.valueAsNumber;
                     })
-                ]).setAttributes({ class: 'zde' }),
-            ]),
-        ]);
-    }
+                ])
+            ]);
+        }
+        function ui_cal(data) {
+            return h('div').addChildren([
+                h('div').addChildren([
+                    h('button').addText('计算').on('click', ({ model }) => {
+                        model.calc();
+                    }),
+                    h('button').addText('清空结果').on('click', ({ model }) => {
+                        if (!confirm('将清空全部结果，要继续吗?')) {
+                            return;
+                        }
+                        model.clearResult();
+                    }),
+                    h('button').addText('清空基准').on('click', ({ model }) => {
+                        model.baseline = [0, 0];
+                    })
+                ]),
+                h('div').addChildren([
+                    h('button').addText('导入colg模拟器装备清单').on('click', ({ model }) => {
+                        navigator.clipboard.readText().then(x => model.importColgList(x)).then(() => alert('已从剪贴板导入colg模拟器清单')).catch(e => alert(e));
+                    }),
+                    h('button').addText('从txt导入计算结果').on('click', () => {
+                        document.getElementById('fileAcc').click();
+                    }),
+                    h('input').setAttributes({
+                        type: 'file',
+                        id: 'fileAcc',
+                        accept: 'text/plain'
+                    }).on('change', ({ model, srcTarget }) => {
+                        var _a;
+                        const file = (_a = srcTarget.files) === null || _a === void 0 ? void 0 : _a[0];
+                        if (!file) {
+                            return;
+                        }
+                        const fr = new FileReader;
+                        fr.onload = () => {
+                            const content = fr.result;
+                            let status = 0;
+                            let combName = '';
+                            for (let line of content.split('\n')) {
+                                line = line.trim();
+                                if (!line) {
+                                    continue;
+                                }
+                                if (status === 0) {
+                                    if (line.startsWith('#')) {
+                                        combName = line.slice(1);
+                                        model.combName = combName;
+                                    }
+                                    else {
+                                        throw new Error('格式错误:不为#开头');
+                                    }
+                                    status = 1;
+                                }
+                                else {
+                                    model.importJSON(line);
+                                    model.calc(combName);
+                                    status = 0;
+                                }
+                            }
+                            fr.onload = null;
+                            srcTarget.value = '';
+                        };
+                        fr.readAsText(file);
+                    }).setStyle({ display: 'none' }),
+                    h('button').addText('下载所有计算结果').on('click', ({ model }) => {
+                        const texts = [];
+                        const names = [];
+                        for (const result of model.calResults) {
+                            names.push(result.combName);
+                            texts.push('#' + result.combName, result.json);
+                        }
+                        const text_str = texts.join('\n');
+                        const url = URL.createObjectURL(new Blob([
+                            text_str
+                        ], {
+                            type: 'text/plain'
+                        }));
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = '搭配#' + names.join('_') + '.txt';
+                        a.click();
+                    }),
+                ])
+            ]);
+        }
+        function ui_sort(data) {
+            return h('details').addChildren([
+                h('summary').addText('排序'),
+                h('button').addText('按倍率').on('click', ({ model }) => {
+                    model.calResults.sort((a, b) => b.detail.倍率 - a.detail.倍率);
+                }),
+                h('button').addText('按倍率/冷却系数').on('click', ({ model }) => {
+                    model.calResults.sort((a, b) => b.detail.倍率_冷却期望 - a.detail.倍率_冷却期望);
+                }),
+                h('button').addText('按冷却系数').on('click', ({ model }) => {
+                    model.calResults.sort((a, b) => b.detail.冷却系数 - a.detail.冷却系数);
+                }),
+                h('button').addText('按移动速度').on('click', ({ model }) => {
+                    model.calResults.sort((a, b) => b.detail.角色.attrs.移动速度 - a.detail.角色.attrs.移动速度);
+                }),
+                h('button').addText('按攻击速度').on('click', ({ model }) => {
+                    model.calResults.sort((a, b) => b.detail.角色.attrs.攻击速度 - a.detail.角色.attrs.攻击速度);
+                }),
+                h('button').addText('按施放速度').on('click', ({ model }) => {
+                    model.calResults.sort((a, b) => b.detail.角色.attrs.施放速度 - a.detail.角色.attrs.施放速度);
+                }),
+            ]).setAttributes({ class: 'zde' });
+        }
+        function ui_reset(data) {
+            return h('details').addChildren([
+                h('summary').addText('重置'),
+                h('button').addText('重置当前装备数据').on('click', ({ model }) => {
+                    if (confirm('确定要重置当前装备数据吗')) {
+                        model.database = model.dbInit();
+                    }
+                }),
+                h('button').addText('重置所有结果中的装备数据').on('click', ({ model }) => {
+                    if (!confirm('确定要重置所有结果中的装备数据吗')) {
+                        return;
+                    }
+                    const oldResSize = model.calResults.length;
+                    model.calResults.forEach(r => {
+                        model.importJSON(r.json);
+                        model.database = model.dbInit();
+                        model.calc(r.combName);
+                    });
+                    model.calResults.splice(0, oldResSize);
+                }),
+            ]).setAttributes({ class: 'zde' });
+        }
+        function ui_replace_line0(data) {
+            return h('div').addChildren([
+                ((key) => {
+                    return h('label').setStyle({
+                        display: 'block',
+                        userSelect: 'none'
+                    }).addChildren([
+                        h('input')
+                            .setAttributes({ type: 'checkbox' })
+                            .setProperties({ checked: data.replaceDBKeys.has(key) })
+                            .on('change', ({ model, srcTarget }) => {
+                            if (srcTarget.checked) {
+                                model.replaceDBKeys.add(key);
+                            }
+                            else {
+                                model.replaceDBKeys.delete(key);
+                            }
+                        }),
+                        h('span').addText('固定史诗')
+                    ]);
+                })('database'),
+                ((key) => {
+                    return h('label').setStyle({
+                        display: 'block',
+                        userSelect: 'none'
+                    }).addChildren([
+                        h('input')
+                            .setAttributes({ type: 'checkbox' })
+                            .setProperties({ checked: data.replaceDBKeys.has(key) })
+                            .on('change', ({ model, srcTarget }) => {
+                            if (srcTarget.checked) {
+                                model.replaceDBKeys.add(key);
+                            }
+                            else {
+                                model.replaceDBKeys.delete(key);
+                            }
+                        }),
+                        h('span').addText('贴膜史诗')
+                    ]);
+                })('databaseEx'),
+                ((key) => {
+                    return h('label').setStyle({
+                        display: 'block',
+                        userSelect: 'none'
+                    }).addChildren([
+                        h('input')
+                            .setAttributes({ type: 'checkbox' })
+                            .setProperties({ checked: data.replaceDBKeys.has(key) })
+                            .on('change', ({ model, srcTarget }) => {
+                            if (srcTarget.checked) {
+                                model.replaceDBKeys.add(key);
+                            }
+                            else {
+                                model.replaceDBKeys.delete(key);
+                            }
+                        }),
+                        h('span').addText('角色数据')
+                    ]);
+                })('character'),
+                h('button').addText('替换选定结果中的数据').on('click', ({ model }) => {
+                    if (!confirm('确定要替换选定结果中的装备数据吗')) {
+                        return;
+                    }
+                    const oldJson = model.exportJSON();
+                    const keeps = new Map([...model.replaceDBKeys].map(x => [x, model[x]]));
+                    model.calResults.forEach(r => {
+                        if (!r.rpselect) {
+                            return;
+                        }
+                        model.importJSON(r.json);
+                        for (const [key, value] of keeps) {
+                            Reflect.set(model, key, value);
+                        }
+                        model.calc(r.combName);
+                    });
+                    model.calResults = model.calResults.filter(x => !x.rpselect);
+                    model.importJSON(oldJson);
+                })
+            ]).setStyle({
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4,1fr)',
+                border: '1px solid black',
+                marginBottom: '3px',
+                marginLeft: '3px'
+            });
+        }
+        function ui_replace_line1(data) {
+            return h('div').addChildren([
+                h('button').addText('替换选定结果中的使用装备').on('click', ({ model }) => {
+                    if (!confirm('确定要替换选定结果中的使用装备吗')) {
+                        return;
+                    }
+                    const oldJson = model.exportJSON();
+                    const keeps0 = new Map([...model.replaceNormalSlots].map(x => [x, model.currentNormalBox[x]]));
+                    const keeps1 = new Map([...model.replaceExtraSlots].map(x => [x, model.currentExtraBox[x]]));
+                    model.calResults.forEach(r => {
+                        if (!r.rpselect) {
+                            return;
+                        }
+                        model.importJSON(r.json);
+                        for (const [key, value] of keeps0) {
+                            model.currentNormalBox[key] = value;
+                        }
+                        for (const [key, value] of keeps1) {
+                            model.currentExtraBox[key] = value;
+                        }
+                        model.calc(r.combName);
+                    });
+                    model.calResults = model.calResults.filter(x => !x.rpselect);
+                    model.importJSON(oldJson);
+                })
+            ]).setStyle({
+                display: 'grid',
+                gridTemplateColumns: 'repeat(1,1fr)',
+                border: '1px solid black',
+                marginBottom: '3px',
+                marginLeft: '3px'
+            });
+        }
+        function ui_replace_line2(data) {
+            return h('div').addChildren([
+                h('button').addText('结果全选').on('click', ({ model }) => {
+                    model.calResults.forEach(x => x.rpselect = true);
+                }),
+                h('button').addText('结果全不选').on('click', ({ model }) => {
+                    model.calResults.forEach(x => x.rpselect = false);
+                }),
+                h('button').addText('结果反选').on('click', ({ model }) => {
+                    model.calResults.forEach(x => x.rpselect = !x.rpselect);
+                }),
+            ]).setStyle({
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3,1fr)',
+                border: '1px solid black',
+                marginBottom: '3px',
+                marginLeft: '3px'
+            });
+        }
+        function ui_replace(data) {
+            return h('details').addChildren([
+                h('summary').addText('替换'),
+                ui_replace_line2(data),
+                ui_replace_line0(data),
+                ui_replace_line1(data),
+            ]).setAttributes({ class: 'zde' });
+        }
+        function ui_dotFx(data) {
+            return h('details').addChildren([
+                h('summary').addText('异常伤害系数'),
+                h('div').addChildren(Object.keys(data.character.异常伤害系数).map(key => {
+                    return h('div').addChildren([
+                        h('span').addText(key),
+                        h('input').on('change', ({ model, srcTarget }) => {
+                            if (!isNaN(+srcTarget.value)) {
+                                model.character.异常伤害系数[key] = +srcTarget.value;
+                            }
+                        }).setValue(data.character.异常伤害系数[key])
+                    ]);
+                })).setStyle({ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)' })
+            ]).setAttributes({ class: 'zde' });
+        }
+        function ui_controls(data) {
+            return h('div').addChildren([
+                ui_combname(data),
+                ui_search(data),
+                ui_attr0(data),
+                ui_cal(data),
+                ui_sort(data),
+                ui_replace(data),
+                ui_reset(data),
+                ui_dotFx(data)
+            ]);
+        }
+        control_comp.ui_controls = ui_controls;
+    })(control_comp || (control_comp = {}));
 })(ui_components || (ui_components = {}));
 
