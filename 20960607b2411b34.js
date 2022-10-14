@@ -153,7 +153,7 @@ t.attrs.push({ type: '冷却恢复速度', value: 15, times: 1 });
 t.tag = ['攻击范围'];
 belts.set(t.name, t);
 t = new Equip;
-t.name = '永远沉眠的准备';
+t.name = '永眠前的准备';
 t.attrs.push({ type: '攻击强化', value: 4528, times: 1 });
 t.attrs.push({ type: '灼烧伤害', value: 15, times: 1 });
 t.attrs.push({ type: '攻击强化', value: 356, times: 1 });

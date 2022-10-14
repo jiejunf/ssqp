@@ -2,6 +2,7 @@ import { f, Watcher } from "./c3b3404bc419612e.js";
 import { Character, eqAttrTypeWords, Equip, onceMap } from "./fca69cda69b4f22.js";
 import { pure, strTag } from "./4ec836d061f4fc50.js";
 import { calculate } from "./311a82e0d5868018.js";
+import usual_equips from './usual_equips.js';
 //===标准装备===
 import belts from "./20960607b2411b34.js";
 import bracelets from "./663e79a8dac21c1.js";
@@ -926,6 +927,50 @@ var ui_components;
                 })).setStyle({ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)' })
             ]).setAttributes({ class: 'zde' });
         }
+        function ui_usual_equips() {
+            let equips = h('details').addClass('zde').addChild(h('summary').addText('常用搭配'))
+            let equip
+            let equipTitle
+            let equipItems = []
+            let itemStyle = { color: 'blue', 'text-decoration': 'underline' }
+
+            usual_equips.split('\n').map(text => {
+                if (text.length === 0) return
+                if (text.search('—') === -1) {
+                    // title
+                    equipTitle = h('a')
+                      .addText(text)
+                      .setStyle(itemStyle)
+                    equip = h('details')
+                      .addChild(
+                        h('summary').addChild(equipTitle)
+                      )
+                      .setStyle({
+                          'font-size': '1rem',
+                      })
+                    equips.addChild(equip)
+                    equipItems = []
+                } else {
+                    // equip item
+                    equipItems.push(text)
+                    equipTitle.$on = []
+                    let data = equipItems.join('\n')
+                    equipTitle.on('click', ({ model }) => model.importColgList(data))
+                    equip
+                      .addChild(
+                        h('a')
+                          .addText(text)
+                          .setStyle(itemStyle)
+                          .on('click', ({ model }) => model.importColgList(text))
+                      )
+                      .addChild(
+                        h('br')
+                      )
+                }
+            })
+
+            return equips
+        }
         function ui_controls(data) {
             return h('div').addChildren([
                 ui_combname(data),
@@ -935,6 +980,7 @@ var ui_components;
                 ui_sort(data),
                 ui_replace(data),
                 ui_reset(data),
+                ui_usual_equips(),
                 ui_dotFx(data)
             ]);
         }
